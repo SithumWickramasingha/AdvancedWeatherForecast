@@ -24,9 +24,13 @@ public class Weather {
 
         //System.out.println(configuration.getCity());
 
+        // get location data
         JSONObject cityLocationData = (JSONObject) getLocationData(config.getCity());
 
+        double latitude = (double) cityLocationData.get("latitude");
+        double longitude = (double) cityLocationData.get("longitude");
 
+        displayWeatherData(latitude, longitude);
 
         return configuration;
     }
@@ -37,6 +41,7 @@ public class Weather {
 
         // checking purpose
         System.out.println("location method called");
+        System.out.println("City name:"+ city);
 
         String urlString =  "https://geocoding-api.open-meteo.com/v1/search?name=" +
                             city +
@@ -117,7 +122,7 @@ public class Weather {
             long relativeHumidity = (long) currentWeatherJson.get("relative_humidity_2m");
             System.out.println("Relative Humidity(2m): "+ relativeHumidity);
 
-            String isDay = (String) currentWeatherJson.get("is_day");
+            long isDay = (long) currentWeatherJson.get("is_day");
             System.out.println("Is day or night: " + isDay);
 
             double precipitation = (double) currentWeatherJson.get("precipitation");
@@ -129,8 +134,8 @@ public class Weather {
             double wind_speed_10m = (double) currentWeatherJson.get("wind_speed_10m");
             System.out.println("wind speed 10m: "+ wind_speed_10m);
 
-            String wind_direction = (String) currentWeatherJson.get("wind_direction_10m");
-            System.out.println("wind_direction_10m" + wind_direction);
+            long wind_direction = (long) currentWeatherJson.get("wind_direction_10m");
+            System.out.println("wind_direction_10m: " + wind_direction);
 
         }catch(Exception e){
             e.printStackTrace();
