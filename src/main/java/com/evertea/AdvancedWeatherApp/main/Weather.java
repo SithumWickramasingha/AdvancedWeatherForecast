@@ -1,6 +1,7 @@
 package com.evertea.AdvancedWeatherApp.main;
 
 import com.evertea.AdvancedWeatherApp.model.Configuration;
+import com.evertea.AdvancedWeatherApp.model.WeatherData;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -75,6 +76,10 @@ public class Weather {
     }
 
     private static void displayWeatherData(double latitude, double longitude){
+
+        // create new object for store weather data
+        WeatherData weatherData = new WeatherData();
+
         try{
             // Fetch the API response based on API link
             String url =    "https://api.open-meteo.com/v1/forecast?latitude="+
@@ -110,35 +115,45 @@ public class Weather {
             if(timeZoneId != null){
                 ZonedDateTime currentTime = ZonedDateTime.now(ZoneId.of(timeZoneId));
                 System.out.println("Current time in the location:" + currentTime);
+                // set current date and time
+                weatherData.setDateTime(currentTime);
 
             }else{
                 System.out.println("Unable to determine time zone for the given coordinates");
             }
 
             double temp = (double) currentWeatherJson.get("temperature_2m");
+            weatherData.setTemp(temp);
             System.out.println("Current Temperature(2m) C: "+ temp);
 
             long relativeHumidity = (long) currentWeatherJson.get("relative_humidity_2m");
+            weatherData.setRelativeHumidity(relativeHumidity);
             System.out.println("Relative Humidity(2m): "+ relativeHumidity);
 
             long isDay = (long) currentWeatherJson.get("is_day");
             if(isDay == 1){
+                weatherData.setDayNight("Is day or night: DAYTIME");
                 System.out.println("Is day or night: DAYTIME");
             }else{
+                weatherData.setDayNight("Is day or night: NIGHTTIME");
                 System.out.println("Is day or night: NIGHTTIME");
             }
 
 
             double precipitation = (double) currentWeatherJson.get("precipitation");
+            weatherData.setPrecipitation(precipitation);
             System.out.println("Precipitation" + precipitation);
 
             double rain = (double) currentWeatherJson.get("rain");
+            weatherData.setRain(rain);
             System.out.println("Rain: "+ rain);
 
             double wind_speed_10m = (double) currentWeatherJson.get("wind_speed_10m");
+            weatherData.setWindSpeed(wind_speed_10m);
             System.out.println("wind speed 10m: "+ wind_speed_10m);
 
             long wind_direction = (long) currentWeatherJson.get("wind_direction_10m");
+            weatherData.setWindDirection(wind_direction);
             System.out.println("wind_direction_10m: " + wind_direction);
 
         }catch(Exception e){
