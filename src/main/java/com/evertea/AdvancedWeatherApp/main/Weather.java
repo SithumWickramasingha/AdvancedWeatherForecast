@@ -1,6 +1,6 @@
 package com.evertea.AdvancedWeatherApp.main;
 
-import com.evertea.AdvancedWeatherApp.config.Configuration;
+import com.evertea.AdvancedWeatherApp.model.Configuration;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -11,7 +11,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.Scanner;
 import java.util.TimeZone;
 
@@ -123,7 +122,12 @@ public class Weather {
             System.out.println("Relative Humidity(2m): "+ relativeHumidity);
 
             long isDay = (long) currentWeatherJson.get("is_day");
-            System.out.println("Is day or night: " + isDay);
+            if(isDay == 1){
+                System.out.println("Is day or night: DAYTIME");
+            }else{
+                System.out.println("Is day or night: NIGHTTIME");
+            }
+
 
             double precipitation = (double) currentWeatherJson.get("precipitation");
             System.out.println("Precipitation" + precipitation);
