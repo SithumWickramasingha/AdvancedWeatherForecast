@@ -169,37 +169,7 @@ public class Weather {
         }
     }
 
-    private static void getWindDirection(long degree){
 
-        WeatherData weatherData = new WeatherData();
-
-        if(degree >= 338 || degree < 23){
-            weatherData.setWindDirection("Wind Direction: North(N)");
-            System.out.println("Wind Direction: North(N)");
-        }else if(degree >= 23 && degree < 68){
-            weatherData.setWindDirection("Wind Direction: North-East (NE)");
-            System.out.println("Wind Direction: North-East (NE)");
-        }else if(degree >= 68 && degree < 113){
-            weatherData.setWindDirection("Wind Direction: East (E)");
-            System.out.println("Wind Direction: East (E)");
-        }else if(degree >= 113 && degree < 158){
-            weatherData.setWindDirection("Wind Direction: South- East(SE) ");
-            System.out.println("Wind Direction: South- East(SE) ");
-        }else if(degree >= 158 && degree < 203){
-            weatherData.setWindDirection("Wind Direction: south (S)");
-            System.out.println("Wind Direction: South (S) ");
-        }else if(degree >= 203 && degree < 248){
-            weatherData.setWindDirection("Wind Direction: South-West (SW)");
-            System.out.println("Wind Direction: South-West(SW) ");
-        }else if(degree >= 248 && degree < 293){
-            weatherData.setWindDirection("Wind Direction: West (W)");
-            System.out.println("Wind Direction: West (W) ");
-        }else {
-            weatherData.setWindDirection("Wind Direction: North-West (NW)");
-            System.out.println("Wind Direction: North-west (NW)");
-        }
-
-    }
 
     private static String getTimeZoneFromLatLong(double lat, double lon){
 
@@ -246,6 +216,39 @@ public class Weather {
         }
 
         return null;
+
+    }
+
+    //method for identify which direction wind comes
+    private static void getWindDirection(long degree){
+
+        WeatherData weatherData = new WeatherData();
+
+        if(degree >= 338 || degree < 23){
+            weatherData.setWindDirection("Wind Direction: North(N)");
+            System.out.println("Wind Direction: North(N)");
+        }else if(degree >= 23 && degree < 68){
+            weatherData.setWindDirection("Wind Direction: North-East (NE)");
+            System.out.println("Wind Direction: North-East (NE)");
+        }else if(degree >= 68 && degree < 113){
+            weatherData.setWindDirection("Wind Direction: East (E)");
+            System.out.println("Wind Direction: East (E)");
+        }else if(degree >= 113 && degree < 158){
+            weatherData.setWindDirection("Wind Direction: South- East(SE) ");
+            System.out.println("Wind Direction: South- East(SE) ");
+        }else if(degree >= 158 && degree < 203){
+            weatherData.setWindDirection("Wind Direction: south (S)");
+            System.out.println("Wind Direction: South (S) ");
+        }else if(degree >= 203 && degree < 248){
+            weatherData.setWindDirection("Wind Direction: South-West (SW)");
+            System.out.println("Wind Direction: South-West(SW) ");
+        }else if(degree >= 248 && degree < 293){
+            weatherData.setWindDirection("Wind Direction: West (W)");
+            System.out.println("Wind Direction: West (W) ");
+        }else {
+            weatherData.setWindDirection("Wind Direction: North-West (NW)");
+            System.out.println("Wind Direction: North-west (NW)");
+        }
 
     }
 }
