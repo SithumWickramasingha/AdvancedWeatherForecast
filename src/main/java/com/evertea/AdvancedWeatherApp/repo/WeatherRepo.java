@@ -50,11 +50,29 @@ public class WeatherRepo {
 
     }
 
-    public void insertWeatherData(String city, ZonedDateTime dateTime, double temp, long relativeHumidity, String dayNight, double precipitation, double rain, double windSpeed, String windDirection){
+    public void insertWeatherData(String city, LocalDateTime dateTime, double temp, long relativeHumidity, String dayNight, double precipitation, double rain, double windSpeed, String windDirection){
         String tableName = city.replaceAll("\\s","_").toLowerCase()+"_weather";
         String sql = "INSERT INTO "+ tableName + " (city, date_time, temp, relative_humidity, day_night, precipitation,rain, wind_speed,wind_direction) VALUES (?,?,?,?,?,?,?,?,?)";
 
-        jdbcTemplate.update(sql, city, Timestamp.valueOf(dateTime.toLocalDateTime()), temp, relativeHumidity, dayNight,precipitation, rain, windSpeed,windDirection);
+        jdbcTemplate.update(sql, city, Timestamp.valueOf(dateTime), temp, relativeHumidity, dayNight,precipitation, rain, windSpeed,windDirection);
 
+    }
+
+    public List<WeatherData> getAllWeatherData(String city){
+        String query = "SELECT * FROM " + city.replace(" " ,"_")+ "_weather";
+        return jdbcTemplate.query(query, (rs, rowNum) ->
+                new WeatherData(
+                        rs.getInt("id"),
+                        rs.getString("city"),
+                        rs.getTimestamp("date_time").toLocalDateTime(),
+                        rs.getDouble("temp"),
+                        rs.getInt("relative_humidity"),
+                        rs.getString("day_night"),
+                        rs.getInt("precipitation"),
+                        rs.getDouble("rain"),
+                        rs.getDouble("wind_speed"),
+                        rs.getString("wind_direction")
+                )
+        );
     }
 }

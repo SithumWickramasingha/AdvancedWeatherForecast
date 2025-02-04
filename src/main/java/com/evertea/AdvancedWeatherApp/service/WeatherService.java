@@ -13,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Scanner;
 import java.util.TimeZone;
 
@@ -131,7 +132,7 @@ public class WeatherService {
                 ZonedDateTime currentTime = ZonedDateTime.now(ZoneId.of(timeZoneId));
                 System.out.println("Current time in the location:" + currentTime);
                 // set current date and time
-                weatherData.setDateTime(currentTime);
+                weatherData.setDateTime(currentTime.toLocalDateTime());
 
             }else{
                 System.out.println("Unable to determine time zone for the given coordinates");
@@ -226,6 +227,10 @@ public class WeatherService {
     public WeatherData getAllData(){
         System.out.println("hello");
         return new WeatherData();
+    }
+
+    public List<WeatherData> getWeatherData(String city){
+        return weatherRepo.getAllWeatherData(city);
     }
 
 
