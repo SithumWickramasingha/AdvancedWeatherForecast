@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Date;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -26,7 +27,7 @@ public class WeatherData implements Serializable {
     private double precipitation;
     private double rain;
     private double windSpeed;
-    private long windDirection;
+    private String windDirection;
 
 
 }

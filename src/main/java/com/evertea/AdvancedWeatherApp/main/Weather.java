@@ -2,10 +2,13 @@ package com.evertea.AdvancedWeatherApp.main;
 
 import com.evertea.AdvancedWeatherApp.model.Configuration;
 import com.evertea.AdvancedWeatherApp.model.WeatherData;
+import com.evertea.AdvancedWeatherApp.repo.WeatherRepo;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -15,8 +18,10 @@ import java.time.ZonedDateTime;
 import java.util.Scanner;
 import java.util.TimeZone;
 
-@Component
+@Service
 public class Weather {
+
+
 
     public Configuration getCity(Configuration config){
 
@@ -37,7 +42,10 @@ public class Weather {
 
     private static JSONObject getLocationData(String city){
 
+        WeatherData weatherData = new WeatherData();
+
         city = city.replaceAll(" ", "+");
+        weatherData.setCity(city);
 
         // checking purpose
         System.out.println("location method called");
@@ -79,6 +87,7 @@ public class Weather {
 
         // create new object for store weather data
         WeatherData weatherData = new WeatherData();
+
 
         try{
             // Fetch the API response based on API link
@@ -139,7 +148,6 @@ public class Weather {
                 System.out.println("Is day or night: NIGHTTIME");
             }
 
-
             double precipitation = (double) currentWeatherJson.get("precipitation");
             weatherData.setPrecipitation(precipitation);
             System.out.println("Precipitation" + precipitation);
@@ -153,12 +161,44 @@ public class Weather {
             System.out.println("wind speed 10m: "+ wind_speed_10m);
 
             long wind_direction = (long) currentWeatherJson.get("wind_direction_10m");
-            weatherData.setWindDirection(wind_direction);
-            System.out.println("wind_direction_10m: " + wind_direction);
+            getWindDirection(wind_direction);
+
 
         }catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    private static void getWindDirection(long degree){
+
+        WeatherData weatherData = new WeatherData();
+
+        if(degree >= 338 || degree < 23){
+            weatherData.setWindDirection("Wind Direction: North(N)");
+            System.out.println("Wind Direction: North(N)");
+        }else if(degree >= 23 && degree < 68){
+            weatherData.setWindDirection("Wind Direction: North-East (NE)");
+            System.out.println("Wind Direction: North-East (NE)");
+        }else if(degree >= 68 && degree < 113){
+            weatherData.setWindDirection("Wind Direction: East (E)");
+            System.out.println("Wind Direction: East (E)");
+        }else if(degree >= 113 && degree < 158){
+            weatherData.setWindDirection("Wind Direction: South- East(SE) ");
+            System.out.println("Wind Direction: South- East(SE) ");
+        }else if(degree >= 158 && degree < 203){
+            weatherData.setWindDirection("Wind Direction: south (S)");
+            System.out.println("Wind Direction: South (S) ");
+        }else if(degree >= 203 && degree < 248){
+            weatherData.setWindDirection("Wind Direction: South-West (SW)");
+            System.out.println("Wind Direction: South-West(SW) ");
+        }else if(degree >= 248 && degree < 293){
+            weatherData.setWindDirection("Wind Direction: West (W)");
+            System.out.println("Wind Direction: West (W) ");
+        }else {
+            weatherData.setWindDirection("Wind Direction: North-West (NW)");
+            System.out.println("Wind Direction: North-west (NW)");
+        }
+
     }
 
     private static String getTimeZoneFromLatLong(double lat, double lon){
