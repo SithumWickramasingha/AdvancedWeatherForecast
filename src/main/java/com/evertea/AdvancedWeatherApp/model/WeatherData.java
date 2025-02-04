@@ -5,6 +5,7 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -14,6 +15,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class WeatherData implements Serializable {
 
     @Id
@@ -28,6 +30,5 @@ public class WeatherData implements Serializable {
     private double rain;
     private double windSpeed;
     private String windDirection;
-
 
 }

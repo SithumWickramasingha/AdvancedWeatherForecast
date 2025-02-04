@@ -3,9 +3,11 @@ package com.evertea.AdvancedWeatherApp.main;
 import com.evertea.AdvancedWeatherApp.model.Configuration;
 import com.evertea.AdvancedWeatherApp.model.WeatherData;
 import com.evertea.AdvancedWeatherApp.repo.WeatherRepo;
+import jdk.swing.interop.SwingInterOpUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -21,23 +23,22 @@ import java.util.TimeZone;
 @Service
 public class Weather {
 
+    public WeatherData getCity(WeatherData data){
 
-
-    public Configuration getCity(Configuration config){
-
-        Configuration configuration = new Configuration(config.getCity());
+        //Configuration configuration = new Configuration(data.getCity());
+        WeatherData weatherData = new WeatherData();
 
         //System.out.println(configuration.getCity());
 
         // get location data
-        JSONObject cityLocationData = (JSONObject) getLocationData(config.getCity());
+        JSONObject cityLocationData = (JSONObject) getLocationData(data.getCity());
 
         double latitude = (double) cityLocationData.get("latitude");
         double longitude = (double) cityLocationData.get("longitude");
 
-        displayWeatherData(latitude, longitude);
+        displayWeatherData(latitude, longitude, data.getCity());
 
-        return configuration;
+        return weatherData;
     }
 
     private static JSONObject getLocationData(String city){
@@ -83,11 +84,14 @@ public class Weather {
         return null;
     }
 
-    private static void displayWeatherData(double latitude, double longitude){
+    @Autowired
+    private WeatherRepo weatherRepo;
+
+
+    private void displayWeatherData(double latitude, double longitude, String city){
 
         // create new object for store weather data
         WeatherData weatherData = new WeatherData();
-
 
         try{
             // Fetch the API response based on API link
@@ -98,6 +102,7 @@ public class Weather {
                             "&current=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,wind_speed_10m,wind_direction_10m&daily=temperature_2m_min";
 
 
+            // fetch API response
             HttpURLConnection apiConnection = fetchApiResponse(url);
 
             // check response status
@@ -113,11 +118,18 @@ public class Weather {
             JSONParser parser = new JSONParser();
             JSONObject jsonObject = (JSONObject) parser.parse(jsonResponse);
             JSONObject currentWeatherJson = (JSONObject) jsonObject.get("current");
-            System.out.println(currentWeatherJson.toJSONString());
+            //System.out.println(currentWeatherJson.toJSONString());
 
             // store the data into their corresponding data type
 //            String time = (String) currentWeatherJson.get("time");
 //            System.out.println("Current time: "+ time);
+
+            if(currentWeatherJson == null){
+                System.out.println("Error: current weather data not available");
+                return;
+            }
+
+            // Extract and set weather data
 
             String timeZoneId = getTimeZoneFromLatLong(latitude, longitude);
 
@@ -131,44 +143,99 @@ public class Weather {
                 System.out.println("Unable to determine time zone for the given coordinates");
             }
 
-            double temp = (double) currentWeatherJson.get("temperature_2m");
+            double temp = ((Number) currentWeatherJson.get("temperature_2m")).doubleValue();
             weatherData.setTemp(temp);
             System.out.println("Current Temperature(2m) C: "+ temp);
 
-            long relativeHumidity = (long) currentWeatherJson.get("relative_humidity_2m");
+            long relativeHumidity = ((Number) currentWeatherJson.get("relative_humidity_2m")).longValue();
             weatherData.setRelativeHumidity(relativeHumidity);
             System.out.println("Relative Humidity(2m): "+ relativeHumidity);
 
-            long isDay = (long) currentWeatherJson.get("is_day");
-            if(isDay == 1){
-                weatherData.setDayNight("Is day or night: DAYTIME");
-                System.out.println("Is day or night: DAYTIME");
-            }else{
-                weatherData.setDayNight("Is day or night: NIGHTTIME");
-                System.out.println("Is day or night: NIGHTTIME");
-            }
+            long isDay = ((Number) currentWeatherJson.get("is_day")).longValue();
+            weatherData.setDayNight(isDay == 1? "DAYTIME" : "NIGHTTIME");
 
-            double precipitation = (double) currentWeatherJson.get("precipitation");
+            double precipitation = ((Number) currentWeatherJson.get("precipitation")).doubleValue();
             weatherData.setPrecipitation(precipitation);
             System.out.println("Precipitation" + precipitation);
 
-            double rain = (double) currentWeatherJson.get("rain");
+            double rain = ((Number) currentWeatherJson.get("rain")).doubleValue();
             weatherData.setRain(rain);
             System.out.println("Rain: "+ rain);
 
-            double wind_speed_10m = (double) currentWeatherJson.get("wind_speed_10m");
+            double wind_speed_10m = ((Number) currentWeatherJson.get("wind_speed_10m")).doubleValue();
             weatherData.setWindSpeed(wind_speed_10m);
             System.out.println("wind speed 10m: "+ wind_speed_10m);
 
-            long wind_direction = (long) currentWeatherJson.get("wind_direction_10m");
-            getWindDirection(wind_direction);
+            long wind_direction = ((Number) currentWeatherJson.get("wind_direction_10m")).longValue();
+            //getWindDirection(wind_direction);
 
+            String message;
+
+            if(wind_direction >= 338 || wind_direction < 23){
+                message = "North(N)";
+                weatherData.setWindDirection(message);
+                System.out.println(message);
+            }else if(wind_direction >= 23 && wind_direction < 68){
+                message = "North-East (NE)";
+                weatherData.setWindDirection(message);
+                System.out.println(message);
+            }else if(wind_direction >= 68 && wind_direction < 113){
+                message = "East (E)";
+                weatherData.setWindDirection(message);
+                System.out.println(message);
+            }else if(wind_direction >= 113 && wind_direction < 158){
+                message = "South- East(SE) ";
+                weatherData.setWindDirection(message);
+                System.out.println(message);
+            }else if(wind_direction >= 158 && wind_direction < 203){
+                message = "south (S)";
+                weatherData.setWindDirection(message);
+                System.out.println(message);
+            }else if(wind_direction >= 203 && wind_direction < 248){
+                message = "South-West (SW)";
+                weatherData.setWindDirection(message);
+                System.out.println(message);
+            }else if(wind_direction >= 248 && wind_direction < 293){
+                message = "West (W)";
+                weatherData.setWindDirection(message);
+                System.out.println(message);
+            }else {
+                message = "North-West (NW)";
+                weatherData.setWindDirection(message);
+                System.out.println(message);
+            }
+
+
+
+
+
+            System.out.println("API JSON Responses: "+ jsonResponse);
+            System.out.println("city from weather data: "+ weatherData.getWindDirection());
+
+            if(!weatherRepo.doesCityTableExist(weatherData.getDayNight())){
+                weatherRepo.createCityTableIfNotExist(city);
+                weatherRepo.insertWeatherData(  city,
+                                                weatherData.getDateTime(),
+                                                weatherData.getTemp(),
+                                                weatherData.getRelativeHumidity(),
+                                                weatherData.getDayNight(),
+                                                weatherData.getPrecipitation(),
+                                                weatherData.getRain(),
+                                                weatherData.getWindSpeed(),
+                                                weatherData.getWindDirection());
+            }else{
+                System.out.println("this table already created");
+            }
 
         }catch(Exception e){
             e.printStackTrace();
         }
     }
 
+    public WeatherData getAllData(){
+        System.out.println("hello");
+        return new WeatherData();
+    }
 
 
     private static String getTimeZoneFromLatLong(double lat, double lon){
@@ -220,35 +287,44 @@ public class Weather {
     }
 
     //method for identify which direction wind comes
-    private static void getWindDirection(long degree){
-
-        WeatherData weatherData = new WeatherData();
-
-        if(degree >= 338 || degree < 23){
-            weatherData.setWindDirection("Wind Direction: North(N)");
-            System.out.println("Wind Direction: North(N)");
-        }else if(degree >= 23 && degree < 68){
-            weatherData.setWindDirection("Wind Direction: North-East (NE)");
-            System.out.println("Wind Direction: North-East (NE)");
-        }else if(degree >= 68 && degree < 113){
-            weatherData.setWindDirection("Wind Direction: East (E)");
-            System.out.println("Wind Direction: East (E)");
-        }else if(degree >= 113 && degree < 158){
-            weatherData.setWindDirection("Wind Direction: South- East(SE) ");
-            System.out.println("Wind Direction: South- East(SE) ");
-        }else if(degree >= 158 && degree < 203){
-            weatherData.setWindDirection("Wind Direction: south (S)");
-            System.out.println("Wind Direction: South (S) ");
-        }else if(degree >= 203 && degree < 248){
-            weatherData.setWindDirection("Wind Direction: South-West (SW)");
-            System.out.println("Wind Direction: South-West(SW) ");
-        }else if(degree >= 248 && degree < 293){
-            weatherData.setWindDirection("Wind Direction: West (W)");
-            System.out.println("Wind Direction: West (W) ");
-        }else {
-            weatherData.setWindDirection("Wind Direction: North-West (NW)");
-            System.out.println("Wind Direction: North-west (NW)");
-        }
-
-    }
+//    private static void getWindDirection(long degree){
+//
+//        WeatherData weatherData = new WeatherData();
+//        String message;
+//
+//        if(degree >= 338 || degree < 23){
+//            message = "Wind Direction: North(N)";
+//            weatherData.setWindDirection(message);
+//            System.out.println(message);
+//        }else if(degree >= 23 && degree < 68){
+//            message = "Wind Direction: North-East (NE)";
+//            weatherData.setWindDirection(message);
+//            System.out.println(message);
+//        }else if(degree >= 68 && degree < 113){
+//            message = "Wind Direction: East (E)";
+//            weatherData.setWindDirection(message);
+//            System.out.println(message);
+//        }else if(degree >= 113 && degree < 158){
+//            message = "Wind Direction: South- East(SE) ";
+//            weatherData.setWindDirection(message);
+//            System.out.println(message);
+//        }else if(degree >= 158 && degree < 203){
+//            message = "Wind Direction: south (S)";
+//            weatherData.setWindDirection(message);
+//            System.out.println(message);
+//        }else if(degree >= 203 && degree < 248){
+//            message = "Wind Direction: South-West (SW)";
+//            weatherData.setWindDirection(message);
+//            System.out.println(message);
+//        }else if(degree >= 248 && degree < 293){
+//            message = "Wind Direction: West (W)";
+//            weatherData.setWindDirection(message);
+//            System.out.println(message);
+//        }else {
+//            message = "Wind Direction: North-West (NW)";
+//            weatherData.setWindDirection(message);
+//            System.out.println(message);
+//        }
+//
+//    }
 }
