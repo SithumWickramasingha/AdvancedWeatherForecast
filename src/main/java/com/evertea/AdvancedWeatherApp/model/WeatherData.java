@@ -24,14 +24,18 @@ public class WeatherData implements Serializable {
     private int Id;
 
     private String city;
-    private LocalDateTime dateTime;
-    private double temp;
-    private long relativeHumidity;
-    private String dayNight;
-    private double precipitation;
-    private double rain;
-    private double windSpeed;
+    private String dateTime;
+    private String cloudCover;
+    private double tempMax;
+    private double tempMin;
+    private long dayLight;
+    private long sunShine;
+    private double uvIndexMax;
+    private double precipitationSum;
+    private double rainSum;
+    private double windSpeedMax;
     private String windDirection;
+
 
 
 }

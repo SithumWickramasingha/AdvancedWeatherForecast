@@ -34,13 +34,16 @@ public class WeatherRepo {
         String createTableSql =    "CREATE TABLE IF NOT EXISTS " + tableName + " ("
                 + "id INT AUTO_INCREMENT PRIMARY KEY, "
                 + "city VARCHAR(50) NOT NULL, "
-                + "date_time DATETIME NOT NULL, "
-                + "temp DECIMAL(5,2), "
-                + "relative_humidity INT, "
-                + "day_night VARCHAR(10), "
-                + "precipitation DECIMAL(5,2), "
-                + "rain DECIMAL(5,2), "
-                + "wind_speed DECIMAL(5,2),"
+                + "date_time VARCHAR(50) NOT NULL, "
+                + "cloud_cover VARCHAR(50), "
+                + "maximum_temp DECIMAL(5,2), "
+                + "minimum_temp DECIMAL(5,2), "
+                + "day_light DECIMAL(5,2), "
+                + "sun_shine DECIMAL(5,2), "
+                + "uv_index_max DECIMAL(5,2),"
+                + "precipitation_sum DECIMAL(5,2), "
+                + "rain_sum DECIMAL(5,2), "
+                + "wind_speed_max DECIMAL(5,2),"
                 + "wind_direction VARCHAR(50)"
                 + ")";
 
@@ -50,11 +53,11 @@ public class WeatherRepo {
 
     }
 
-    public void insertWeatherData(String city, LocalDateTime dateTime, double temp, long relativeHumidity, String dayNight, double precipitation, double rain, double windSpeed, String windDirection){
+    public void insertWeatherData(String city, String dateTime,String cloud_cover, double tempMax,double tempMin,long dayLight,long sunShine, double uvIndexSum, double precipitationSum, double rainSum, double windSpeedMax, String windDirection){
         String tableName = city.replaceAll("\\s","_").toLowerCase()+"_weather";
-        String sql = "INSERT INTO "+ tableName + " (city, date_time, temp, relative_humidity, day_night, precipitation,rain, wind_speed,wind_direction) VALUES (?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO "+ tableName + " (city, date_time,cloud_cover, maximum_temp, minimum_temp, day_light, sun_shine, uv_index_max, precipitation_sum, rain_sum, wind_speed_max, wind_direction) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
-        jdbcTemplate.update(sql, city, Timestamp.valueOf(dateTime), temp, relativeHumidity, dayNight,precipitation, rain, windSpeed,windDirection);
+        jdbcTemplate.update(sql, city, dateTime, cloud_cover, tempMax,tempMin, dayLight,sunShine, uvIndexSum, precipitationSum, rainSum, windSpeedMax, windDirection);
 
     }
 
@@ -64,13 +67,16 @@ public class WeatherRepo {
                 new WeatherData(
                         rs.getInt("id"),
                         rs.getString("city"),
-                        rs.getTimestamp("date_time").toLocalDateTime(),
-                        rs.getDouble("temp"),
-                        rs.getInt("relative_humidity"),
-                        rs.getString("day_night"),
-                        rs.getInt("precipitation"),
-                        rs.getDouble("rain"),
-                        rs.getDouble("wind_speed"),
+                        rs.getString("date_time"),
+                        rs.getString("cloud_cover"),
+                        rs.getDouble("maximum_temp"),
+                        rs.getDouble("minimum_temp"),
+                        rs.getLong("day_light"),
+                        rs.getLong("sun_shine"),
+                        rs.getDouble("uv_index_max"),
+                        rs.getInt("precipitation_sum"),
+                        rs.getDouble("rain_sum"),
+                        rs.getDouble("wind_speed_max"),
                         rs.getString("wind_direction")
                 )
         );

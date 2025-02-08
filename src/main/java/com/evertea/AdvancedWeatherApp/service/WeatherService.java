@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -47,6 +49,7 @@ public class WeatherService {
 
         // checking purpose
         System.out.println("location method called");
+        System.out.println("------------------------------------------------------------------");
         System.out.println("City name:"+ city);
 
         String urlString =  "https://geocoding-api.open-meteo.com/v1/search?name=" +
@@ -65,6 +68,8 @@ public class WeatherService {
 
             // Read the response and Convert store string type
             String jsonResponse = readApiResponses(apiConnection);
+
+            System.out.println("API response: "+ jsonResponse.toString());
 
             // parse the string into a json object
             JSONParser parser = new JSONParser();
@@ -86,19 +91,18 @@ public class WeatherService {
 
 
     private void displayWeatherData(double latitude, double longitude, String city){
+        System.out.println("city: "+ city);
 
         // create new object for store weather data
         WeatherData weatherData = new WeatherData();
 
         try{
-            // Fetch the API response based on API link
+             //Fetch the API response based on API link
             String url =    "https://api.open-meteo.com/v1/forecast?latitude="+
-                            latitude+
+                            latitude +
                             "&longitude="+
                             longitude +
-                            "&current=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,wind_speed_10m,wind_direction_10m&daily=temperature_2m_min";
-
-
+                            "&current=cloud_cover&daily=temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,wind_speed_10m_max,wind_direction_10m_dominant&timezone=auto";
             // fetch API response
             HttpURLConnection apiConnection = fetchApiResponse(url);
 
@@ -115,7 +119,9 @@ public class WeatherService {
             JSONParser parser = new JSONParser();
             JSONObject jsonObject = (JSONObject) parser.parse(jsonResponse);
             JSONObject currentWeatherJson = (JSONObject) jsonObject.get("current");
-            //System.out.println(currentWeatherJson.toJSONString());
+            JSONObject dailyWeatherJson = (JSONObject) jsonObject.get("daily");
+
+            System.out.println("daily weather : "+dailyWeatherJson.toJSONString());
 
             // store the data into their corresponding data type
 
@@ -124,121 +130,173 @@ public class WeatherService {
                 return;
             }
 
-            // Extract and set weather data
+            // Extract and set weather data ------------------------------------------------
 
-            String timeZoneId = getTimeZoneFromLatLong(latitude, longitude);
 
-            if(timeZoneId != null){
-                ZonedDateTime currentTime = ZonedDateTime.now(ZoneId.of(timeZoneId));
-                System.out.println("Current time in the location:" + currentTime);
-                // set current date and time
-                weatherData.setDateTime(currentTime.toLocalDateTime());
-
+            int cloudCover = ((Number) currentWeatherJson.get("cloud_cover")).intValue();
+            String coverage;
+            if(cloudCover >= 0 && cloudCover <= 25){
+                coverage = "Mostly Sunny";
+                weatherData.setCloudCover(coverage);
+                System.out.println("cloud cover: "+ coverage);
+            }else if(cloudCover >= 26 && cloudCover <= 50){
+                coverage = "Partly Cloud";
+                weatherData.setCloudCover(coverage);
+                System.out.println("cloud cover: "+ coverage);
+            }else if(cloudCover >= 51 && cloudCover <= 75){
+                coverage = "Mostly Cloudy";
+                weatherData.setCloudCover(coverage);
+                System.out.println("cloud cover: "+ coverage);
             }else{
-                System.out.println("Unable to determine time zone for the given coordinates");
-            }
-
-            double temp = ((Number) currentWeatherJson.get("temperature_2m")).doubleValue();
-            weatherData.setTemp(temp);
-            System.out.println("Current Temperature(2m) C: "+ temp);
-
-            long relativeHumidity = ((Number) currentWeatherJson.get("relative_humidity_2m")).longValue();
-            weatherData.setRelativeHumidity(relativeHumidity);
-            System.out.println("Relative Humidity(2m): "+ relativeHumidity);
-
-            long isDay = ((Number) currentWeatherJson.get("is_day")).longValue();
-            weatherData.setDayNight(isDay == 1? "DAYTIME" : "NIGHTTIME");
-
-            double precipitation = ((Number) currentWeatherJson.get("precipitation")).doubleValue();
-            weatherData.setPrecipitation(precipitation);
-            System.out.println("Precipitation" + precipitation);
-
-            double rain = ((Number) currentWeatherJson.get("rain")).doubleValue();
-            weatherData.setRain(rain);
-            System.out.println("Rain: "+ rain);
-
-            double wind_speed_10m = ((Number) currentWeatherJson.get("wind_speed_10m")).doubleValue();
-            weatherData.setWindSpeed(wind_speed_10m);
-            System.out.println("wind speed 10m: "+ wind_speed_10m);
-
-            long wind_direction = ((Number) currentWeatherJson.get("wind_direction_10m")).longValue();
-            //getWindDirection(wind_direction);
-
-            String message;
-
-            if(wind_direction >= 338 || wind_direction < 23){
-                message = "North (N)";
-                weatherData.setWindDirection(message);
-                System.out.println(message);
-            }else if(wind_direction >= 23 && wind_direction < 68){
-                message = "North-East (NE)";
-                weatherData.setWindDirection(message);
-                System.out.println(message);
-            }else if(wind_direction >= 68 && wind_direction < 113){
-                message = "East (E)";
-                weatherData.setWindDirection(message);
-                System.out.println(message);
-            }else if(wind_direction >= 113 && wind_direction < 158){
-                message = "South- East (SE) ";
-                weatherData.setWindDirection(message);
-                System.out.println(message);
-            }else if(wind_direction >= 158 && wind_direction < 203){
-                message = "south (S)";
-                weatherData.setWindDirection(message);
-                System.out.println(message);
-            }else if(wind_direction >= 203 && wind_direction < 248){
-                message = "South-West (SW)";
-                weatherData.setWindDirection(message);
-                System.out.println(message);
-            }else if(wind_direction >= 248 && wind_direction < 293){
-                message = "West (W)";
-                weatherData.setWindDirection(message);
-                System.out.println(message);
-            }else {
-                message = "North-West (NW)";
-                weatherData.setWindDirection(message);
-                System.out.println(message);
+                coverage = "Overcast";
+                weatherData.setCloudCover(coverage);
+                System.out.println("cloud cover: "+ coverage);
             }
 
 
-            System.out.println("API JSON Responses: "+ jsonResponse);
-            System.out.println("city from weather data: "+ weatherData.getWindDirection());
+            JSONArray timeArray = (JSONArray) dailyWeatherJson.get("time");
 
-            if(!weatherRepo.doesCityTableExist(weatherData.getDayNight())){
-                weatherRepo.createCityTableIfNotExist(city);
-                weatherRepo.insertWeatherData(  city,
-                                                weatherData.getDateTime(),
-                                                weatherData.getTemp(),
-                                                weatherData.getRelativeHumidity(),
-                                                weatherData.getDayNight(),
-                                                weatherData.getPrecipitation(),
-                                                weatherData.getRain(),
-                                                weatherData.getWindSpeed(),
-                                                weatherData.getWindDirection());
-            }else{
-                System.out.println("this table already created");
+            //Extract arrays
+            JSONArray temperatureMaxArray = (JSONArray) dailyWeatherJson.get("temperature_2m_max");
+            JSONArray temperatureMinArray = (JSONArray) dailyWeatherJson.get("temperature_2m_min");
+            JSONArray dayLightArray = (JSONArray) dailyWeatherJson.get("daylight_duration");
+            JSONArray sunShineArray = (JSONArray) dailyWeatherJson.get("sunshine_duration");
+            JSONArray uvIndexArray = (JSONArray) dailyWeatherJson.get("uv_index_max");
+            JSONArray precipitationSumArray = (JSONArray) dailyWeatherJson.get("precipitation");
+            JSONArray rainSumArray = (JSONArray) dailyWeatherJson.get("rain");
+            JSONArray windSpeedArray = (JSONArray) dailyWeatherJson.get("wind_speed_10m_max");
+            JSONArray windDirectionArray = (JSONArray) dailyWeatherJson.get("wind_direction_10m_dominant");
+
+            if(rainSumArray == null){
+                System.out.println("no rain forecast");
+
             }
+
+            for (int i=0; i < timeArray.size(); i++){
+                System.out.println("-------------------------------------------");
+
+                String date = (String) timeArray.get(i);
+                weatherData.setDateTime(date);
+                System.out.println(date);
+
+
+                //
+                double tempMax = ((Number) temperatureMaxArray.get(i)).doubleValue();
+                weatherData.setTempMax(tempMax);
+                System.out.println("Maximum Temperature(2m) C: "+ tempMax);
+
+                double tempMin = ((Number) temperatureMinArray.get(i)).doubleValue();
+                weatherData.setTempMin(tempMin);
+                System.out.println("Minimum Temperature(2m) c: "+ tempMin);
+
+                long dayLight = ((Number) dayLightArray.get(i)).longValue();
+                long dayLightHour = dayLight/ 3600;
+                weatherData.setDayLight(dayLightHour);
+                System.out.println("Day light (hourly): "+ dayLightHour);
+
+                long sunShine = ((Number) sunShineArray.get(i)).longValue();
+                long sunShineHour = sunShine / 3600;
+                weatherData.setSunShine(sunShineHour);
+                System.out.println("Sun shine (h): "+ sunShineHour);
+
+                double uvIndexMax = ((Number) uvIndexArray.get(i)).doubleValue();
+                weatherData.setUvIndexMax(uvIndexMax);
+                System.out.println("UV index max: "+ uvIndexMax);
+
+//                double precipitationSum = ((Number) precipitationSumArray.get(i)).doubleValue();
+//                weatherData.setPrecipitationSum(precipitationSum);
+//                System.out.println("Precipitation Sum: " + precipitationSum);
+//
+//                double rainSum = ((Number) rainSumArray.get(i)).doubleValue();
+//                weatherData.setRainSum(rainSum);
+//                System.out.println("Rain sum: "+ rainSum);
+
+
+                double wind_speed_max_10m = ((Number) windSpeedArray.get(i)).doubleValue();
+                weatherData.setWindSpeedMax(wind_speed_max_10m);
+                System.out.println("wind speed 10m: "+ wind_speed_max_10m);
+
+
+                long wind_direction = ((Number) windDirectionArray.get(i)).longValue();
+
+                String message;
+
+                if(wind_direction >= 338 || wind_direction < 23){
+                    message = "North (N)";
+                    weatherData.setWindDirection(message);
+                    System.out.println(message);
+                }else if(wind_direction >= 23 && wind_direction < 68){
+                    message = "North-East (NE)";
+                    weatherData.setWindDirection(message);
+                    System.out.println(message);
+                }else if(wind_direction >= 68 && wind_direction < 113){
+                    message = "East (E)";
+                    weatherData.setWindDirection(message);
+                    System.out.println(message);
+                }else if(wind_direction >= 113 && wind_direction < 158){
+                    message = "South- East (SE) ";
+                    weatherData.setWindDirection(message);
+                    System.out.println(message);
+                }else if(wind_direction >= 158 && wind_direction < 203){
+                    message = "south (S)";
+                    weatherData.setWindDirection(message);
+                    System.out.println(message);
+                }else if(wind_direction >= 203 && wind_direction < 248){
+                    message = "South-West (SW)";
+                    weatherData.setWindDirection(message);
+                    System.out.println(message);
+                }else if(wind_direction >= 248 && wind_direction < 293){
+                    message = "West (W)";
+                    weatherData.setWindDirection(message);
+                    System.out.println(message);
+                }else {
+                    message = "North-West (NW)";
+                    weatherData.setWindDirection(message);
+                    System.out.println(message);
+                }
+
+                if(!weatherRepo.doesCityTableExist(message)){
+                    weatherRepo.createCityTableIfNotExist(city);
+                    weatherRepo.insertWeatherData(  city,
+                            weatherData.getDateTime(),
+                            weatherData.getCloudCover(),
+                            weatherData.getTempMax(),
+                            weatherData.getTempMin(),
+                            weatherData.getDayLight(),
+                            weatherData.getSunShine(),
+                            weatherData.getUvIndexMax(),
+                            weatherData.getPrecipitationSum(),
+                            weatherData.getRainSum(),
+                            weatherData.getWindSpeedMax(),
+                            weatherData.getWindDirection());
+                }else{
+                    System.out.println("this table already created");
+                }
+            }
+
+
+
 
         }catch(Exception e){
             e.printStackTrace();
         }
     }
 
-    public WeatherData getAllData(){
-        System.out.println("hello");
-        return new WeatherData();
-    }
 
+
+    // retrieve the all data to frontend
     public List<WeatherData> getWeatherData(String city){
         return weatherRepo.getAllWeatherData(city);
     }
 
 
+    // to fetched the current time
     private static String getTimeZoneFromLatLong(double lat, double lon){
 
         TimeZone time = TimeZone.getTimeZone("GMT");
         return time.getID();
     }
+
     private static String readApiResponses(HttpURLConnection apiConnection){
         try{
             // create a string builder to store the resulting JSON data
