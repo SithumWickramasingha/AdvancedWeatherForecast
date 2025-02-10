@@ -6,15 +6,15 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+
+import javax.management.Notification;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Scanner;
 import java.util.TimeZone;
@@ -22,7 +22,20 @@ import java.util.TimeZone;
 @Service
 public class WeatherService {
 
+    double latitude;
+    double longitude;
+    String city;
+
+    // create reference for weather repository layer
+    @Autowired
+    private WeatherRepo weatherRepo;
+
+    // create reference for weather notification service layer
+    @Autowired
+    private WeatherNotificationService weatherNotificationService;
+
     public WeatherData getCity(WeatherData data){
+        city = data.getCity();
 
         //Configuration configuration = new Configuration(data.getCity());
         WeatherData weatherData = new WeatherData();
@@ -30,12 +43,13 @@ public class WeatherService {
         //System.out.println(configuration.getCity());
 
         // get location data
-        JSONObject cityLocationData = (JSONObject) getLocationData(data.getCity());
+        JSONObject cityLocationData = (JSONObject) getLocationData(city);
 
-        double latitude = (double) cityLocationData.get("latitude");
-        double longitude = (double) cityLocationData.get("longitude");
+        latitude = (double) cityLocationData.get("latitude");
+        longitude = (double) cityLocationData.get("longitude");
 
-        displayWeatherData(latitude, longitude, data.getCity());
+        //displayWeatherData(latitude, longitude, data.getCity());
+
 
         return weatherData;
     }
@@ -50,7 +64,7 @@ public class WeatherService {
         // checking purpose
         System.out.println("location method called");
         System.out.println("------------------------------------------------------------------");
-        System.out.println("City name:"+ city);
+        System.out.println("City name from get location method: "+ city);
 
         String urlString =  "https://geocoding-api.open-meteo.com/v1/search?name=" +
                             city +
@@ -86,11 +100,11 @@ public class WeatherService {
         return null;
     }
 
-    @Autowired
-    private WeatherRepo weatherRepo;
+
+    @Scheduled(fixedRate = 10000, initialDelay = 5000)
+    private void displayWeatherData(){
 
 
-    private void displayWeatherData(double latitude, double longitude, String city){
         System.out.println("city: "+ city);
 
         // create new object for store weather data
@@ -172,7 +186,16 @@ public class WeatherService {
 
             }
 
-            for (int i=0; i < timeArray.size(); i++){
+            // generate the weather table for each city
+            // check the table was created or not
+            if(!weatherRepo.doesCityTableExist(city)){
+                weatherRepo.createCityTableIfNotExist(city);
+
+            }else{
+                System.out.println("this table already created");
+            }
+
+            for (int i=0; i < 1; i++){
                 System.out.println("-------------------------------------------");
 
                 String date = (String) timeArray.get(i);
@@ -255,26 +278,22 @@ public class WeatherService {
                     System.out.println(message);
                 }
 
-                if(!weatherRepo.doesCityTableExist(message)){
-                    weatherRepo.createCityTableIfNotExist(city);
-                    weatherRepo.insertWeatherData(  city,
-                            weatherData.getDateTime(),
-                            weatherData.getCloudCover(),
-                            weatherData.getTempMax(),
-                            weatherData.getTempMin(),
-                            weatherData.getDayLight(),
-                            weatherData.getSunShine(),
-                            weatherData.getUvIndexMax(),
-                            weatherData.getPrecipitationSum(),
-                            weatherData.getRainSum(),
-                            weatherData.getWindSpeedMax(),
-                            weatherData.getWindDirection());
-                }else{
-                    System.out.println("this table already created");
-                }
+                weatherRepo.insertWeatherData(city,
+                        weatherData.getDateTime(),
+                        weatherData.getCloudCover(),
+                        weatherData.getTempMax(),
+                        weatherData.getTempMin(),
+                        weatherData.getDayLight(),
+                        weatherData.getSunShine(),
+                        weatherData.getUvIndexMax(),
+                        weatherData.getPrecipitationSum(),
+                        weatherData.getRainSum(),
+                        weatherData.getWindSpeedMax(),
+                        weatherData.getWindDirection());
+
             }
 
-
+            weatherNotificationService.getNotificationMessage(weatherData);
 
 
         }catch(Exception e){
@@ -290,12 +309,12 @@ public class WeatherService {
     }
 
 
-    // to fetched the current time
-    private static String getTimeZoneFromLatLong(double lat, double lon){
+//    @Scheduled(fixedRate = 10000, initialDelay = 5000)
+//    public void getMessage(){
+//
+//    }
 
-        TimeZone time = TimeZone.getTimeZone("GMT");
-        return time.getID();
-    }
+
 
     private static String readApiResponses(HttpURLConnection apiConnection){
         try{

@@ -2,14 +2,9 @@ package com.evertea.AdvancedWeatherApp.repo;
 
 import com.evertea.AdvancedWeatherApp.model.WeatherData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 @Repository
@@ -81,4 +76,7 @@ public class WeatherRepo {
                 )
         );
     }
+
+
+
 }
