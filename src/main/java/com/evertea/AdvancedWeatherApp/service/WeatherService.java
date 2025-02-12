@@ -3,20 +3,25 @@ package com.evertea.AdvancedWeatherApp.service;
 import com.evertea.AdvancedWeatherApp.exceptions.NullPointException;
 import com.evertea.AdvancedWeatherApp.model.WeatherData;
 import com.evertea.AdvancedWeatherApp.repo.WeatherRepo;
+import com.evertea.AdvancedWeatherApp.webSockets.WeatherDataWebSocketHandler;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 
 import javax.management.Notification;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.TimeZone;
 
@@ -34,6 +39,10 @@ public class WeatherService {
     // create reference for weather notification service layer
     @Autowired
     private WeatherNotificationService weatherNotificationService;
+
+    @Autowired
+    private WeatherDataWebSocketHandler webSocketHandler;
+
 
     public WeatherData getCity(WeatherData data){
         city = data.getCity();
@@ -58,6 +67,8 @@ public class WeatherService {
     private static JSONObject getLocationData(String city){
 
         WeatherData weatherData = new WeatherData();
+
+        RestTemplate restTemplate = new RestTemplate();
 
         city = city.replaceAll(" ", "+");
         weatherData.setCity(city);
@@ -193,6 +204,7 @@ public class WeatherService {
                 String date = (String) timeArray.get(i);
                 weatherData.setDateTime(date);
                 System.out.println(date);
+                notifyWeatherDataWebSocket(date, "date");
 
 
                 int cloudCover = ((Number) currentWeatherJson.get("cloud_cover")).intValue();
@@ -201,58 +213,73 @@ public class WeatherService {
                     coverage = "Mostly Sunny";
                     weatherData.setCloudCover(coverage);
                     System.out.println("cloud cover: "+ coverage);
+                    notifyWeatherDataWebSocket(coverage,"Coverage");
                 }else if(cloudCover >= 26 && cloudCover <= 50){
                     coverage = "Partly Cloudy";
                     weatherData.setCloudCover(coverage);
+                    notifyWeatherDataWebSocket(coverage,"Coverage");
                     System.out.println("cloud cover: "+ coverage);
                 }else if(cloudCover >= 51 && cloudCover <= 75){
                     coverage = "Mostly Cloudy";
                     weatherData.setCloudCover(coverage);
                     System.out.println("cloud cover: "+ coverage);
+                    notifyWeatherDataWebSocket(coverage,"Coverage");
                 }else{
                     coverage = "Overcast";
                     weatherData.setCloudCover(coverage);
                     System.out.println("cloud cover: "+ coverage);
+                    notifyWeatherDataWebSocket(coverage,"Coverage");
                 }
 
                 double currentTemp = Math.round(((Number) currentWeatherJson.get("temperature_2m")).doubleValue());
                 weatherData.setCurrentTemp(currentTemp);
                 System.out.println("Current temperature: "+ currentTemp);
+                notifyWeatherDataWebSocket(String.valueOf(currentTemp), "Current temperature");
 
                 //
                 double tempMax = Math.round(((Number) temperatureMaxArray.get(i)).doubleValue());
                 weatherData.setTempMax(tempMax);
                 System.out.println("Maximum Temperature(2m) C: "+ tempMax);
+                notifyWeatherDataWebSocket(String.valueOf(tempMax), "Maximum Temperature");
+
 
                 double tempMin = Math.round(((Number) temperatureMinArray.get(i)).doubleValue());
                 weatherData.setTempMin(tempMin);
                 System.out.println("Minimum Temperature(2m) c: "+ tempMin);
+                notifyWeatherDataWebSocket(String.valueOf(tempMin), "Minimum Temperature");
 
                 long dayLight = ((Number) dayLightArray.get(i)).longValue();
                 long dayLightHour = dayLight/ 3600;
                 weatherData.setDayLight(dayLightHour);
                 System.out.println("Day light (hourly): "+ dayLightHour);
+                notifyWeatherDataWebSocket(String.valueOf(dayLightHour),"Day Light Hour");
 
                 long sunShine = ((Number) sunShineArray.get(i)).longValue();
                 long sunShineHour = sunShine / 3600;
                 weatherData.setSunShine(sunShineHour);
                 System.out.println("Sun shine (h): "+ sunShineHour);
+                notifyWeatherDataWebSocket(String.valueOf(sunShineHour), "Sun Shine Hour");
 
                 double uvIndexMax = Math.round(((Number) uvIndexArray.get(i)).doubleValue());
                 weatherData.setUvIndexMax(uvIndexMax);
                 System.out.println("UV index max: "+ uvIndexMax);
+                notifyWeatherDataWebSocket(String.valueOf(uvIndexMax), "UV index");
 
                 double precipitationSum = Math.round(((Number) precipitationSumArray.get(i)).doubleValue());
                 weatherData.setPrecipitationSum(precipitationSum);
                 System.out.println("Precipitation Sum: " + precipitationSum);
+                notifyWeatherDataWebSocket(String.valueOf(precipitationSum), "Precipitation sum");
+
 
                 double rainSum = Math.round(((Number) rainSumArray.get(i)).doubleValue());
                 weatherData.setRainSum(rainSum);
                 System.out.println("Rain sum: "+ rainSum);
+                notifyWeatherDataWebSocket(String.valueOf(rainSum), "Rain sum");
 
                 double wind_speed_max_10m = Math.round(((Number) windSpeedArray.get(i)).doubleValue());
                 weatherData.setWindSpeedMax(wind_speed_max_10m);
                 System.out.println("wind speed 10m: "+ wind_speed_max_10m);
+                notifyWeatherDataWebSocket(String.valueOf(wind_speed_max_10m), "Wind Speed");
 
 
                 long wind_direction = Math.round(((Number) windDirectionArray.get(i)).longValue());
@@ -263,35 +290,44 @@ public class WeatherService {
                     message = "North (N)";
                     weatherData.setWindDirection(message);
                     System.out.println(message);
+                    notifyWeatherDataWebSocket(message, "Wind Direction");
                 }else if(wind_direction >= 23 && wind_direction < 68){
                     message = "North-East (NE)";
                     weatherData.setWindDirection(message);
                     System.out.println(message);
+                    notifyWeatherDataWebSocket(message, "Wind Direction");
                 }else if(wind_direction >= 68 && wind_direction < 113){
                     message = "East (E)";
                     weatherData.setWindDirection(message);
                     System.out.println(message);
+                    notifyWeatherDataWebSocket(message, "Wind Direction");
                 }else if(wind_direction >= 113 && wind_direction < 158){
                     message = "South- East (SE) ";
                     weatherData.setWindDirection(message);
                     System.out.println(message);
+                    notifyWeatherDataWebSocket(message, "Wind Direction");
                 }else if(wind_direction >= 158 && wind_direction < 203){
                     message = "south (S)";
                     weatherData.setWindDirection(message);
                     System.out.println(message);
+                    notifyWeatherDataWebSocket(message, "Wind Direction");
                 }else if(wind_direction >= 203 && wind_direction < 248){
                     message = "South-West (SW)";
                     weatherData.setWindDirection(message);
                     System.out.println(message);
+                    notifyWeatherDataWebSocket(message, "Wind Direction");
                 }else if(wind_direction >= 248 && wind_direction < 293){
                     message = "West (W)";
                     weatherData.setWindDirection(message);
                     System.out.println(message);
+                    notifyWeatherDataWebSocket(message, "Wind Direction");
                 }else {
                     message = "North-West (NW)";
                     weatherData.setWindDirection(message);
                     System.out.println(message);
+                    notifyWeatherDataWebSocket(message, "Wind Direction");
                 }
+
 
                 weatherRepo.insertWeatherData(city,
                         weatherData.getDateTime(),
@@ -373,6 +409,29 @@ public class WeatherService {
 
         return null;
 
+    }
+
+    private void notifyWeatherDataWebSocket(String data, String type){
+        try{
+            String message = data
+                    .replace("\\", "\\\\")  // Escape backslashes
+                    .replace("\"", "\\\"")  // Escape double quotes
+                    .replace("\n", "\\n")   // Escape newlines
+                    .replace("\r", "\\r")   // Escape carriage returns
+                    .replace("\t", "\\t");  // Escape tabs
+
+            String dataJson = String.format(
+                    "{\"type\": \"%s\", \"message\": \"%s\"}",
+                    type,
+                    message
+            );
+
+            webSocketHandler.broadCast(dataJson);
+            System.out.println("Weather data send");
+
+        }catch(Exception e){
+            System.out.println("Error while notifying log websocket: "+ e.getMessage());
+        }
     }
 
 }

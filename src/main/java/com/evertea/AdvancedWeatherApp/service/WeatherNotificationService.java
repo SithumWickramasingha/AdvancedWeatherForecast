@@ -4,6 +4,7 @@ import com.evertea.AdvancedWeatherApp.exceptions.NullPointException;
 import com.evertea.AdvancedWeatherApp.model.WeatherData;
 import com.evertea.AdvancedWeatherApp.model.WeatherNotification;
 import com.evertea.AdvancedWeatherApp.repo.NotificationRepo;
+import com.evertea.AdvancedWeatherApp.webSockets.WeatherDataWebSocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,9 @@ public class WeatherNotificationService {
 
     @Autowired
     private NotificationRepo notificationRepo;
+
+    @Autowired
+    private WeatherDataWebSocketHandler webSocketHandler;
 
     public void getNotificationMessage(WeatherData weatherData) {
 
@@ -86,6 +90,9 @@ public class WeatherNotificationService {
                     WeatherNotification notification = notificationRepo.findById(notificationIdArray[i]);
                     System.out.println("* "+notification.getMessage());
                     System.out.println();
+
+                    notifyWeatherDataWebSocket(notification.getMessage(), "notifications");
+                    //formatMessage(notification.getMessage(), weatherData);
                 }
 
             }
@@ -100,7 +107,7 @@ public class WeatherNotificationService {
 //            System.out.println();
 //            System.out.println();
 
-            //formatMessage(notification.getMessage(), weatherData);
+
         }
 
     }
@@ -118,4 +125,27 @@ public class WeatherNotificationService {
 //
 //
 //    }
+
+    private void notifyWeatherDataWebSocket(String data, String type){
+        try{
+            String message = data
+                    .replace("\\", "\\\\")  // Escape backslashes
+                    .replace("\"", "\\\"")  // Escape double quotes
+                    .replace("\n", "\\n")   // Escape newlines
+                    .replace("\r", "\\r")   // Escape carriage returns
+                    .replace("\t", "\\t");  // Escape tabs
+
+            String messageJson = String.format(
+                    "{\"type\": \"%s\", \"message\": \"%s\"}",
+                    type,
+                    message
+            );
+
+            webSocketHandler.broadCast(messageJson);
+            System.out.println("Weather notification sent: "+ messageJson);
+
+        }catch(Exception e){
+            System.out.println("Error while notifying log webSocket: "+ e.getMessage());
+        }
+    }
 }

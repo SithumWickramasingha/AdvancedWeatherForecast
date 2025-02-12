@@ -3,6 +3,8 @@ package com.evertea.AdvancedWeatherApp.controller;
 import com.evertea.AdvancedWeatherApp.service.WeatherService;
 import com.evertea.AdvancedWeatherApp.model.WeatherData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +22,12 @@ public class WeatherController {
     @PostMapping("/demo")
     public List<WeatherData> getCity(@RequestBody WeatherData data){
         System.out.println("Fetched the city");
+
+        if(data == null){
+            System.out.println("no data found");
+            return null;
+        }
+
         weather.getCity(data);
 
         // retrieve weather data for the given city
