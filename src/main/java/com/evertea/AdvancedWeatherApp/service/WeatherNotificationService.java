@@ -84,7 +84,7 @@ public class WeatherNotificationService {
             for(int i=0; i < notificationIdArray.length; i++){
                 if(notificationIdArray[i] != 0){
                     WeatherNotification notification = notificationRepo.findById(notificationIdArray[i]);
-                    System.out.println(notification.getMessage());
+                    System.out.println("* "+notification.getMessage());
                     System.out.println();
                 }
 

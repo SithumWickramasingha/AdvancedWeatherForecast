@@ -1,5 +1,6 @@
 package com.evertea.AdvancedWeatherApp.repo;
 
+import com.evertea.AdvancedWeatherApp.exceptions.NullPointException;
 import com.evertea.AdvancedWeatherApp.model.WeatherData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -14,14 +15,15 @@ public class WeatherRepo {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public boolean doesCityTableExist(String city){
+    public boolean doesCityTableExist(String city)  {
+
         String tableName = city.replaceAll("\\s+", "_").toLowerCase() + "_weather";
 
         String sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?";
 
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, tableName);
 
-        return count != null && count > 0;
+        return count > 0;
     }
 
     public void createCityTableIfNotExist(String city){
@@ -58,6 +60,11 @@ public class WeatherRepo {
     }
 
     public List<WeatherData> getAllWeatherData(String city){
+
+        if(city == null || city.isBlank()){
+            System.out.println("City cannot be null");
+        }
+
         String query = "SELECT * FROM " + city.replace(" " ,"_")+ "_weather";
         return jdbcTemplate.query(query, (rs, rowNum) ->
                 new WeatherData(

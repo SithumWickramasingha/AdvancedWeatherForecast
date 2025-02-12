@@ -105,6 +105,11 @@ public class WeatherService {
     @Scheduled(fixedRate = 10000, initialDelay = 6000)
     private void displayWeatherData() throws NullPointException {
 
+        if(city == null || city.isBlank()){
+            System.out.println("City is null. waiting for API response .........");
+            return;
+        }
+
 
         System.out.println("city: "+ city);
 
@@ -210,17 +215,16 @@ public class WeatherService {
                     System.out.println("cloud cover: "+ coverage);
                 }
 
-                double currentTemp = ((Number) currentWeatherJson.get("temperature_2m")).doubleValue();
-                double temp = Math.round(currentTemp); // round the temperature to close max number
-                weatherData.setCurrentTemp(temp);
-                System.out.println("Current temperature: "+ temp);
+                double currentTemp = Math.round(((Number) currentWeatherJson.get("temperature_2m")).doubleValue());
+                weatherData.setCurrentTemp(currentTemp);
+                System.out.println("Current temperature: "+ currentTemp);
 
                 //
-                double tempMax = ((Number) temperatureMaxArray.get(i)).doubleValue();
+                double tempMax = Math.round(((Number) temperatureMaxArray.get(i)).doubleValue());
                 weatherData.setTempMax(tempMax);
                 System.out.println("Maximum Temperature(2m) C: "+ tempMax);
 
-                double tempMin = ((Number) temperatureMinArray.get(i)).doubleValue();
+                double tempMin = Math.round(((Number) temperatureMinArray.get(i)).doubleValue());
                 weatherData.setTempMin(tempMin);
                 System.out.println("Minimum Temperature(2m) c: "+ tempMin);
 
@@ -234,24 +238,24 @@ public class WeatherService {
                 weatherData.setSunShine(sunShineHour);
                 System.out.println("Sun shine (h): "+ sunShineHour);
 
-                double uvIndexMax = ((Number) uvIndexArray.get(i)).doubleValue();
+                double uvIndexMax = Math.round(((Number) uvIndexArray.get(i)).doubleValue());
                 weatherData.setUvIndexMax(uvIndexMax);
                 System.out.println("UV index max: "+ uvIndexMax);
 
-                double precipitationSum = ((Number) precipitationSumArray.get(i)).doubleValue();
+                double precipitationSum = Math.round(((Number) precipitationSumArray.get(i)).doubleValue());
                 weatherData.setPrecipitationSum(precipitationSum);
                 System.out.println("Precipitation Sum: " + precipitationSum);
 
-                double rainSum = ((Number) rainSumArray.get(i)).doubleValue();
+                double rainSum = Math.round(((Number) rainSumArray.get(i)).doubleValue());
                 weatherData.setRainSum(rainSum);
                 System.out.println("Rain sum: "+ rainSum);
 
-                double wind_speed_max_10m = ((Number) windSpeedArray.get(i)).doubleValue();
+                double wind_speed_max_10m = Math.round(((Number) windSpeedArray.get(i)).doubleValue());
                 weatherData.setWindSpeedMax(wind_speed_max_10m);
                 System.out.println("wind speed 10m: "+ wind_speed_max_10m);
 
 
-                long wind_direction = ((Number) windDirectionArray.get(i)).longValue();
+                long wind_direction = Math.round(((Number) windDirectionArray.get(i)).longValue());
 
                 String message;
 
