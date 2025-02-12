@@ -1,5 +1,6 @@
 package com.evertea.AdvancedWeatherApp.service;
 
+import com.evertea.AdvancedWeatherApp.exceptions.NullPointException;
 import com.evertea.AdvancedWeatherApp.model.WeatherData;
 import com.evertea.AdvancedWeatherApp.repo.WeatherRepo;
 import org.json.simple.JSONArray;
@@ -22,8 +23,8 @@ import java.util.TimeZone;
 @Service
 public class WeatherService {
 
-    double latitude;
-    double longitude;
+    double latitude = 0;
+    double longitude = 0;
     String city;
 
     // create reference for weather repository layer
@@ -101,8 +102,8 @@ public class WeatherService {
     }
 
 
-    @Scheduled(fixedRate = 10000, initialDelay = 5000)
-    private void displayWeatherData(){
+    @Scheduled(fixedRate = 10000, initialDelay = 6000)
+    private void displayWeatherData() throws NullPointException {
 
 
         System.out.println("city: "+ city);
@@ -113,10 +114,11 @@ public class WeatherService {
         try{
              //Fetch the API response based on API link
             String url =    "https://api.open-meteo.com/v1/forecast?latitude="+
-                            latitude +
+                            latitude+
                             "&longitude="+
-                            longitude +
-                            "&current=cloud_cover&daily=temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,wind_speed_10m_max,wind_direction_10m_dominant&timezone=auto";
+                            longitude+
+                            "&current=temperature_2m,cloud_cover&daily=temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,wind_speed_10m_max,wind_direction_10m_dominant&timezone=auto";
+
             // fetch API response
             HttpURLConnection apiConnection = fetchApiResponse(url);
 
@@ -144,28 +146,7 @@ public class WeatherService {
                 return;
             }
 
-            // Extract and set weather data ------------------------------------------------
 
-
-            int cloudCover = ((Number) currentWeatherJson.get("cloud_cover")).intValue();
-            String coverage;
-            if(cloudCover >= 0 && cloudCover <= 25){
-                coverage = "Mostly Sunny";
-                weatherData.setCloudCover(coverage);
-                System.out.println("cloud cover: "+ coverage);
-            }else if(cloudCover >= 26 && cloudCover <= 50){
-                coverage = "Partly Cloud";
-                weatherData.setCloudCover(coverage);
-                System.out.println("cloud cover: "+ coverage);
-            }else if(cloudCover >= 51 && cloudCover <= 75){
-                coverage = "Mostly Cloudy";
-                weatherData.setCloudCover(coverage);
-                System.out.println("cloud cover: "+ coverage);
-            }else{
-                coverage = "Overcast";
-                weatherData.setCloudCover(coverage);
-                System.out.println("cloud cover: "+ coverage);
-            }
 
 
             JSONArray timeArray = (JSONArray) dailyWeatherJson.get("time");
@@ -176,8 +157,8 @@ public class WeatherService {
             JSONArray dayLightArray = (JSONArray) dailyWeatherJson.get("daylight_duration");
             JSONArray sunShineArray = (JSONArray) dailyWeatherJson.get("sunshine_duration");
             JSONArray uvIndexArray = (JSONArray) dailyWeatherJson.get("uv_index_max");
-            JSONArray precipitationSumArray = (JSONArray) dailyWeatherJson.get("precipitation");
-            JSONArray rainSumArray = (JSONArray) dailyWeatherJson.get("rain");
+            JSONArray precipitationSumArray = (JSONArray) dailyWeatherJson.get("precipitation_sum");
+            JSONArray rainSumArray = (JSONArray) dailyWeatherJson.get("rain_sum");
             JSONArray windSpeedArray = (JSONArray) dailyWeatherJson.get("wind_speed_10m_max");
             JSONArray windDirectionArray = (JSONArray) dailyWeatherJson.get("wind_direction_10m_dominant");
 
@@ -192,8 +173,14 @@ public class WeatherService {
                 weatherRepo.createCityTableIfNotExist(city);
 
             }else{
-                System.out.println("this table already created");
+                System.out.println(city +"_weather table is already created");
             }
+
+            // Extract and set weather data ------------------------------------------------
+
+
+
+
 
             for (int i=0; i < 1; i++){
                 System.out.println("-------------------------------------------");
@@ -202,6 +189,31 @@ public class WeatherService {
                 weatherData.setDateTime(date);
                 System.out.println(date);
 
+
+                int cloudCover = ((Number) currentWeatherJson.get("cloud_cover")).intValue();
+                String coverage;
+                if(cloudCover >= 0 && cloudCover <= 25){
+                    coverage = "Mostly Sunny";
+                    weatherData.setCloudCover(coverage);
+                    System.out.println("cloud cover: "+ coverage);
+                }else if(cloudCover >= 26 && cloudCover <= 50){
+                    coverage = "Partly Cloudy";
+                    weatherData.setCloudCover(coverage);
+                    System.out.println("cloud cover: "+ coverage);
+                }else if(cloudCover >= 51 && cloudCover <= 75){
+                    coverage = "Mostly Cloudy";
+                    weatherData.setCloudCover(coverage);
+                    System.out.println("cloud cover: "+ coverage);
+                }else{
+                    coverage = "Overcast";
+                    weatherData.setCloudCover(coverage);
+                    System.out.println("cloud cover: "+ coverage);
+                }
+
+                double currentTemp = ((Number) currentWeatherJson.get("temperature_2m")).doubleValue();
+                double temp = Math.round(currentTemp); // round the temperature to close max number
+                weatherData.setCurrentTemp(temp);
+                System.out.println("Current temperature: "+ temp);
 
                 //
                 double tempMax = ((Number) temperatureMaxArray.get(i)).doubleValue();
@@ -226,14 +238,13 @@ public class WeatherService {
                 weatherData.setUvIndexMax(uvIndexMax);
                 System.out.println("UV index max: "+ uvIndexMax);
 
-//                double precipitationSum = ((Number) precipitationSumArray.get(i)).doubleValue();
-//                weatherData.setPrecipitationSum(precipitationSum);
-//                System.out.println("Precipitation Sum: " + precipitationSum);
-//
-//                double rainSum = ((Number) rainSumArray.get(i)).doubleValue();
-//                weatherData.setRainSum(rainSum);
-//                System.out.println("Rain sum: "+ rainSum);
+                double precipitationSum = ((Number) precipitationSumArray.get(i)).doubleValue();
+                weatherData.setPrecipitationSum(precipitationSum);
+                System.out.println("Precipitation Sum: " + precipitationSum);
 
+                double rainSum = ((Number) rainSumArray.get(i)).doubleValue();
+                weatherData.setRainSum(rainSum);
+                System.out.println("Rain sum: "+ rainSum);
 
                 double wind_speed_max_10m = ((Number) windSpeedArray.get(i)).doubleValue();
                 weatherData.setWindSpeedMax(wind_speed_max_10m);
@@ -281,6 +292,7 @@ public class WeatherService {
                 weatherRepo.insertWeatherData(city,
                         weatherData.getDateTime(),
                         weatherData.getCloudCover(),
+                        weatherData.getCurrentTemp(),
                         weatherData.getTempMax(),
                         weatherData.getTempMin(),
                         weatherData.getDayLight(),

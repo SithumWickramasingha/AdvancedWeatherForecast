@@ -1,6 +1,7 @@
 package com.evertea.AdvancedWeatherApp.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import org.springframework.stereotype.Component;
 

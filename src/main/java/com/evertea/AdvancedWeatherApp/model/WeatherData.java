@@ -22,6 +22,7 @@ public class WeatherData implements Serializable {
     private String city;
     private String dateTime;
     private String cloudCover;
+    private double currentTemp;
     private double tempMax;
     private double tempMin;
     private long dayLight;

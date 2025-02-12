@@ -31,6 +31,7 @@ public class WeatherRepo {
                 + "city VARCHAR(50) NOT NULL, "
                 + "date_time VARCHAR(50) NOT NULL, "
                 + "cloud_cover VARCHAR(50), "
+                + "current_temp DECIMAL(5,2), "
                 + "maximum_temp DECIMAL(5,2), "
                 + "minimum_temp DECIMAL(5,2), "
                 + "day_light DECIMAL(5,2), "
@@ -48,11 +49,11 @@ public class WeatherRepo {
 
     }
 
-    public void insertWeatherData(String city, String dateTime,String cloud_cover, double tempMax,double tempMin,long dayLight,long sunShine, double uvIndexSum, double precipitationSum, double rainSum, double windSpeedMax, String windDirection){
+    public void insertWeatherData(String city, String dateTime,String cloud_cover,double currentTemp, double tempMax,double tempMin,long dayLight,long sunShine, double uvIndexSum, double precipitationSum, double rainSum, double windSpeedMax, String windDirection){
         String tableName = city.replaceAll("\\s","_").toLowerCase()+"_weather";
-        String sql = "INSERT INTO "+ tableName + " (city, date_time,cloud_cover, maximum_temp, minimum_temp, day_light, sun_shine, uv_index_max, precipitation_sum, rain_sum, wind_speed_max, wind_direction) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO "+ tableName + " (city, date_time,cloud_cover,current_temp, maximum_temp, minimum_temp, day_light, sun_shine, uv_index_max, precipitation_sum, rain_sum, wind_speed_max, wind_direction) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-        jdbcTemplate.update(sql, city, dateTime, cloud_cover, tempMax,tempMin, dayLight,sunShine, uvIndexSum, precipitationSum, rainSum, windSpeedMax, windDirection);
+        jdbcTemplate.update(sql, city, dateTime, cloud_cover,currentTemp, tempMax,tempMin, dayLight,sunShine, uvIndexSum, precipitationSum, rainSum, windSpeedMax, windDirection);
 
     }
 
@@ -64,6 +65,7 @@ public class WeatherRepo {
                         rs.getString("city"),
                         rs.getString("date_time"),
                         rs.getString("cloud_cover"),
+                        rs.getDouble("current_temp"),
                         rs.getDouble("maximum_temp"),
                         rs.getDouble("minimum_temp"),
                         rs.getLong("day_light"),
