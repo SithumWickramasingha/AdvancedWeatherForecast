@@ -1,29 +1,21 @@
 package com.evertea.AdvancedWeatherApp.service;
 
+import com.evertea.AdvancedWeatherApp.DTO.FirebaseNotification;
 import com.evertea.AdvancedWeatherApp.exceptions.NullPointException;
-import com.evertea.AdvancedWeatherApp.model.WeatherData;
+import com.evertea.AdvancedWeatherApp.DTO.WeatherData;
 import com.evertea.AdvancedWeatherApp.repo.WeatherRepo;
 import com.evertea.AdvancedWeatherApp.webSockets.WeatherDataWebSocketHandler;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 
-import javax.management.Notification;
-import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.TimeZone;
 
 @Service
 public class WeatherService {
@@ -44,8 +36,8 @@ public class WeatherService {
     private WeatherDataWebSocketHandler webSocketHandler;
 
 
-    public WeatherData getCity(WeatherData data){
-        city = data.getCity();
+    public WeatherData getCity(FirebaseNotification notification){
+        city = notification.getCity();
 
         //Configuration configuration = new Configuration(data.getCity());
         WeatherData weatherData = new WeatherData();
@@ -84,7 +76,7 @@ public class WeatherService {
 
         try{
             // Fetch the API response based on API link
-            HttpURLConnection apiConnection = fetchApiResponse(urlString);
+            HttpURLConnection apiConnection = ApiResponse.fetchApiResponse(urlString);
 
             // check for response status
             if(apiConnection.getResponseCode() != 200){
@@ -93,7 +85,7 @@ public class WeatherService {
             }
 
             // Read the response and Convert store string type
-            String jsonResponse = readApiResponses(apiConnection);
+            String jsonResponse = ApiResponse.readApiResponses(apiConnection);
 
             System.out.println("API response: "+ jsonResponse.toString());
 
@@ -104,6 +96,8 @@ public class WeatherService {
             // Retrieve location data
             JSONArray locationData = (JSONArray) resultJsonObject.get("results");
             return (JSONObject) locationData.get(0);
+
+
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -113,9 +107,10 @@ public class WeatherService {
     }
 
 
-    @Scheduled(fixedRate = 10000, initialDelay = 6000)
+    @Scheduled(fixedRate = 50000, initialDelay = 6000)
     private void displayWeatherData() throws NullPointException {
 
+        // prevent the program execute until get the API response
         if(city == null || city.isBlank()){
             System.out.println("City is null. waiting for API response .........");
             return;
@@ -136,7 +131,7 @@ public class WeatherService {
                             "&current=temperature_2m,cloud_cover&daily=temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,wind_speed_10m_max,wind_direction_10m_dominant&timezone=auto";
 
             // fetch API response
-            HttpURLConnection apiConnection = fetchApiResponse(url);
+            HttpURLConnection apiConnection = ApiResponse.fetchApiResponse(url);
 
             // check response status
             if(apiConnection.getResponseCode() != 200){
@@ -145,7 +140,7 @@ public class WeatherService {
             }
 
             // read the response and convert store String type
-            String jsonResponse = readApiResponses(apiConnection);
+            String jsonResponse = ApiResponse.readApiResponses(apiConnection);
 
             // parse the string into a Json
             JSONParser parser = new JSONParser();
@@ -366,50 +361,6 @@ public class WeatherService {
 //
 //    }
 
-
-
-    private static String readApiResponses(HttpURLConnection apiConnection){
-        try{
-            // create a string builder to store the resulting JSON data
-            StringBuilder resultJson = new StringBuilder();
-
-            //create a scanner to read from the InputStream of the HttpURLConnection
-            Scanner scanner = new Scanner(apiConnection.getInputStream());
-
-            // loop through each line in the response and append it to the StringBuilder
-            while(scanner.hasNext()) {
-                //read and append the current line to the StringBuilder
-                resultJson.append(scanner.nextLine());
-
-            }
-
-            return resultJson.toString(); // return the Json data as a string
-
-        } catch(IOException e){
-            e.printStackTrace();
-
-        }
-
-        return null;
-    }
-
-    private static HttpURLConnection fetchApiResponse(String urlString){
-        try{
-            //attempt to create connection
-            URL url = new URL(urlString);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-            //set request method to get
-            connection.setRequestMethod("GET");
-
-            return connection;
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-
-        return null;
-
-    }
 
     private void notifyWeatherDataWebSocket(String data, String type){
         try{

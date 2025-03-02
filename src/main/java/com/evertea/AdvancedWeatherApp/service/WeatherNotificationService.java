@@ -1,8 +1,7 @@
 package com.evertea.AdvancedWeatherApp.service;
 
-import com.evertea.AdvancedWeatherApp.exceptions.NullPointException;
-import com.evertea.AdvancedWeatherApp.model.WeatherData;
-import com.evertea.AdvancedWeatherApp.model.WeatherNotification;
+import com.evertea.AdvancedWeatherApp.DTO.WeatherData;
+import com.evertea.AdvancedWeatherApp.DTO.WeatherNotification;
 import com.evertea.AdvancedWeatherApp.repo.NotificationRepo;
 import com.evertea.AdvancedWeatherApp.webSockets.WeatherDataWebSocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,8 @@ public class WeatherNotificationService {
 
     @Autowired
     private NotificationRepo notificationRepo;
+    @Autowired
+    private FirebaseMessagingService firebaseMessagingService;
 
     @Autowired
     private WeatherDataWebSocketHandler webSocketHandler;
@@ -89,6 +90,7 @@ public class WeatherNotificationService {
                 if(notificationIdArray[i] != 0){
                     WeatherNotification notification = notificationRepo.findById(notificationIdArray[i]);
                     System.out.println("* "+notification.getMessage());
+                    firebaseMessagingService.sendNotificationByToken(notification.getMessage());
                     System.out.println();
 
                     notifyWeatherDataWebSocket(notification.getMessage(), "notifications");

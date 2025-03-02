@@ -19,7 +19,7 @@ public class WeatherDataWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session){
         System.out.println("--------------------------------------");
-        System.out.println("Connection Established");
+        System.out.println("         Connection Established       ");
         System.out.println("--------------------------------------");
         sessions.add(session);
     }
@@ -27,7 +27,7 @@ public class WeatherDataWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, org.springframework.web.socket.CloseStatus status){
         System.out.println("--------------------------------------");
-        System.out.println("Disconnected");
+        System.out.println("          Disconnected                ");
         System.out.println("--------------------------------------");
         sessions.remove(session);
     }

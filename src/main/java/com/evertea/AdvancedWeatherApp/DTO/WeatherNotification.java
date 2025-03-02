@@ -1,4 +1,4 @@
-package com.evertea.AdvancedWeatherApp.model;
+package com.evertea.AdvancedWeatherApp.DTO;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

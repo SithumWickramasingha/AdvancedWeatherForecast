@@ -1,7 +1,6 @@
 package com.evertea.AdvancedWeatherApp.repo;
 
-import com.evertea.AdvancedWeatherApp.exceptions.NullPointException;
-import com.evertea.AdvancedWeatherApp.model.WeatherData;
+import com.evertea.AdvancedWeatherApp.DTO.WeatherData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
