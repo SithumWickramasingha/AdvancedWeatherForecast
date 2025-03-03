@@ -1,14 +1,12 @@
 package com.evertea.AdvancedWeatherApp.service;
 
 import com.evertea.AdvancedWeatherApp.DTO.FirebaseNotification;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.*;
 import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,9 +24,19 @@ public class FirebaseMessagingService {
     }
 
     public String sendNotificationByToken(String message){
-    System.out.println("send notification by token called");
-        String title = "☁️ System Alert!";
+        System.out.println("send notification by token called");
+
+        String title = "☁️ System Alert!" + String.valueOf(new Date());
         String body = message;
+
+
+//        Map<String, String> data = new HashMap<>();
+//        data.put("title", title);
+//        data.put("body", body);
+//        data.put("Time", String.valueOf(new Date()));
+
+
+
 
         Notification notification = Notification.builder()
                 .setTitle(title)
@@ -39,6 +47,8 @@ public class FirebaseMessagingService {
                 .setToken(token)
                 .setNotification(notification)
                 .build();
+
+
 
         try{
             firebaseMessaging.send(message1);

@@ -107,7 +107,7 @@ public class WeatherService {
     }
 
 
-    @Scheduled(fixedRate = 50000, initialDelay = 6000)
+    @Scheduled(fixedRate = 10000, initialDelay = 6000)
     private void displayWeatherData() throws NullPointException {
 
         // prevent the program execute until get the API response
