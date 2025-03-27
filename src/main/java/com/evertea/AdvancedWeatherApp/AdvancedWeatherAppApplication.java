@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
@@ -27,6 +28,12 @@ public class AdvancedWeatherAppApplication {
 		FirebaseApp app = FirebaseApp.initializeApp(firebaseOptions, "my-app");
 
 		return FirebaseMessaging.getInstance(app);
+	}
+
+	@Bean
+	public RestTemplate restTemplate(){
+		System.out.println("rest template called");
+		return new RestTemplate();
 	}
 
 

@@ -1,14 +1,11 @@
 package com.evertea.AdvancedWeatherApp.service;
 
-import com.evertea.AdvancedWeatherApp.DTO.FirebaseNotification;
+import com.evertea.AdvancedWeatherApp.DTO.LocationAndTokenReceiver;
 import com.google.firebase.messaging.*;
-import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class FirebaseMessagingService {
@@ -18,7 +15,7 @@ public class FirebaseMessagingService {
     @Autowired
     private FirebaseMessaging firebaseMessaging;
 
-    public void getTokenFromController(FirebaseNotification notification){
+    public void getTokenFromController(LocationAndTokenReceiver notification){
         token = notification.getRecipientToken();
         System.out.println("controller : "+token);
     }

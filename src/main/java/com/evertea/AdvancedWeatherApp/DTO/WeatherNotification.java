@@ -13,11 +13,9 @@ import lombok.NoArgsConstructor;
 public class WeatherNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private String id;
 
-    private String conditionType;
-    private String message;
-    private String priority;
+    private String notification_message;
 
 
 }

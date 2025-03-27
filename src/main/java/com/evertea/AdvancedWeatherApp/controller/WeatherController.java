@@ -1,6 +1,6 @@
 package com.evertea.AdvancedWeatherApp.controller;
 
-import com.evertea.AdvancedWeatherApp.DTO.FirebaseNotification;
+import com.evertea.AdvancedWeatherApp.DTO.LocationAndTokenReceiver;
 import com.evertea.AdvancedWeatherApp.service.FirebaseMessagingService;
 import com.evertea.AdvancedWeatherApp.service.WeatherService;
 import com.evertea.AdvancedWeatherApp.DTO.WeatherData;
@@ -23,7 +23,7 @@ public class WeatherController {
     private FirebaseMessagingService firebaseMessagingService;
 
     @PostMapping("/demo")
-    public List<WeatherData> getCity(@RequestBody FirebaseNotification firebaseNotification){
+    public List<WeatherData> getCity(@RequestBody LocationAndTokenReceiver firebaseNotification){
         System.out.println("Fetched the city");
 
         if(firebaseNotification == null){
