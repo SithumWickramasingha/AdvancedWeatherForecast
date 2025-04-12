@@ -154,37 +154,32 @@ public class WeatherNotificationService {
                 messageQueueWS[i][1] = "22";
             }
             if(soilTemp > 35){
-                message = "☀️ High soil temperature detected ("+soilTemp+"°C). Increase irrigation.";
+
                 messageQueueST[i][0] = time;
                 messageQueueST[i][1] = "23";
             }
             if(soilTemp >= 30 && soilTemp <= 35){
-                message = "🔥 Warm soil conditions detected ("+soilTemp+"°C). Maintain hydration.";
+
                 messageQueueST[i][0] = time;
                 messageQueueST[i][1] = "24";
             }
             if(soilTemp >= 20 && soilTemp <= 30){
-                message = "✅ Optimal soil temperature for tea plants at "+soilTemp+" °C.";
                 messageQueueST[i][0] = time;
                 messageQueueST[i][1] = "25";
             }
             if(soilTemp >= 15 && soilTemp < 20){
-                message = "🌡️ Cool soil detected at "+soilTemp+" °C. Mulching can help retain warmth.";
                 messageQueueST[i][0] = time;
                 messageQueueST[i][1] = "26";
             }
             if(soilTemp < 15){
-                message = "❄️ Low soil temperature detected ("+soilTemp+" °C). Protect root systems.";
                 messageQueueST[i][0] = time;
                 messageQueueST[i][1] = "27";
             }
             if(rain > 10 && windSpeed > 30){
-                message = "⛈️ Severe weather alert! Heavy rain and strong winds expected at "+time+".";
                 messageQueueAC[i][0] = time;
                 messageQueueAC[i][1] = "28";
             }
             if(relativeHumidity > 85 && temp > 28){
-                message = "🔥 High humidity and heat detected! Risk of plant diseases";
                 messageQueueAC[i][0] = time;
                 messageQueueAC[i][1] = "29";
             }
@@ -198,232 +193,241 @@ public class WeatherNotificationService {
         String formattedTime = truncatedTime.format(formatter);
 
 
-        if(formattedTime.equals("10 PM") || formattedTime.equals("11 PM")) {
-            HashSet<String> set = new HashSet<>();
+        switch (formattedTime) {
+            case "04 AM", "05 AM" -> {
+                HashSet<String> set = new HashSet<>();
 
-            for (int i = 0; i < messageQueue.length; i++) {
+                for (int i = 0; i < messageQueue.length; i++) {
 
-                //System.out.println(messageQueue[i][0].equals("06 AM"));
-                if (messageQueue[i][0].equals("06 AM") ||
-                        messageQueue[i][0].equals("07 AM") ||
-                        messageQueueRP[i][0].equals("06 AM") ||
-                        messageQueueRP[i][0].equals("07 AM") ||
-                        messageQueueRH[i][0].equals("06 AM") ||
-                        messageQueueRH[i][0].equals("07 AM") ||
-                        messageQueueWS[i][0].equals("06 AM") ||
-                        messageQueueWS[i][0].equals("07 AM") ||
-                        messageQueueST[i][0].equals("06 AM") ||
-                        messageQueueST[i][0].equals("07 AM")
+                    //System.out.println(messageQueue[i][0].equals("06 AM"));
+                    if (messageQueue[i][0].equals("06 AM") ||
+                            messageQueue[i][0].equals("07 AM") ||
+                            messageQueueRP[i][0].equals("06 AM") ||
+                            messageQueueRP[i][0].equals("07 AM") ||
+                            messageQueueRH[i][0].equals("06 AM") ||
+                            messageQueueRH[i][0].equals("07 AM") ||
+                            messageQueueWS[i][0].equals("06 AM") ||
+                            messageQueueWS[i][0].equals("07 AM") ||
+                            messageQueueST[i][0].equals("06 AM") ||
+                            messageQueueST[i][0].equals("07 AM")
 
-                ) {
-
-
-                    set.add(messageQueue[i][1]);
-                    set.add(messageQueueRP[i][1]);
-                    set.add(messageQueueRH[i][1]);
-                    set.add(messageQueueST[i][1]);
-                    set.add(messageQueueWS[i][1]);
-                }
-
-            }
+                    ) {
 
 
-            sendNotificationToFrontend(month, set);
-
-        }
-        else if(formattedTime.equals("06 AM") || formattedTime.equals("07 AM")){
-
-            HashSet<String> set = new HashSet<>();
-
-            for(int i=0; i<messageQueue.length; i++){
-
-                if( messageQueue[i][0].equals("08 AM") ||
-                        messageQueue[i][0].equals("09 AM") ||
-                        messageQueueRH[i][0].equals("08 AM") ||
-                        messageQueueRH[i][0].equals("09 AM") ||
-                        messageQueueRP[i][0].equals("08 AM") ||
-                        messageQueueRP[i][0].equals("09 AM") ||
-                        messageQueueWS[i][0].equals("08 AM") ||
-                        messageQueueWS[i][0].equals("09 AM") ||
-                        messageQueueST[i][0].equals("08 AM") ||
-                        messageQueueST[i][0].equals("09 AM")
-                ){
-
-                    set.add(messageQueue[i][1]);
-                    set.add(messageQueueRP[i][1]);
-                    set.add(messageQueueRH[i][1]);
-                    set.add(messageQueueST[i][1]);
-                    set.add(messageQueueWS[i][1]);
-                }
-
-            }
-
-            sendNotificationToFrontend(month, set);
-        }else if(formattedTime.equals("08 AM") || formattedTime.equals("09 AM")){
-
-            HashSet<String> set = new HashSet<>();
-
-            for(int i=0; i< messageQueue.length; i++){
-                if(
-                        messageQueue[i][0].equals("10 PM") ||
-                                messageQueue[i][0].equals("11 PM") ||
-                                messageQueueRH[i][0].equals("10 PM") ||
-                                messageQueueRH[i][0].equals("11 PM") ||
-                                messageQueueRP[i][0].equals("10 PM") ||
-                                messageQueueRP[i][0].equals("11 PM") ||
-                                messageQueueWS[i][0].equals("10 PM") ||
-                                messageQueueWS[i][0].equals("11 PM") ||
-                                messageQueueST[i][0].equals("10 PM") ||
-                                messageQueueST[i][0].equals("11 PM")
-                ){
-                    set.add(messageQueue[i][1]);
-                    set.add(messageQueueRP[i][1]);
-                    set.add(messageQueueRH[i][1]);
-                    set.add(messageQueueST[i][1]);
-                    set.add(messageQueueWS[i][1]);
+                        set.add(messageQueue[i][1]);
+                        set.add(messageQueueRP[i][1]);
+                        set.add(messageQueueRH[i][1]);
+                        set.add(messageQueueST[i][1]);
+                        set.add(messageQueueWS[i][1]);
+                    }
 
                 }
+
+
+                sendNotificationToFrontend(month, set);
+
             }
+            case "06 AM", "07 AM" -> {
 
-            sendNotificationToFrontend(month, set);
-        }else if(formattedTime.equals("10 AM") || formattedTime.equals("11 AM")){
-            System.out.println("Time is :"+ formattedTime);
-            HashSet<String> set = new HashSet<>();
+                HashSet<String> set = new HashSet<>();
 
-            for(int i=0; i< messageQueue.length; i++){
-                if(
-                        messageQueue[i][0].equals("12 PM") ||
-                                messageQueue[i][0].equals("01 PM") ||
-                                messageQueueRH[i][0].equals("12 PM") ||
-                                messageQueueRH[i][0].equals("01 PM") ||
-                                messageQueueRP[i][0].equals("12 PM") ||
-                                messageQueueRP[i][0].equals("01 PM") ||
-                                messageQueueWS[i][0].equals("12 PM") ||
-                                messageQueueWS[i][0].equals("01 PM") ||
-                                messageQueueST[i][0].equals("12 PM") ||
-                                messageQueueST[i][0].equals("01 PM")
-                ){
-                    set.add(messageQueue[i][1]);
-                    set.add(messageQueueRP[i][1]);
-                    set.add(messageQueueRH[i][1]);
-                    set.add(messageQueueST[i][1]);
-                    set.add(messageQueueWS[i][1]);
+                for (int i = 0; i < messageQueue.length; i++) {
+
+                    if (messageQueue[i][0].equals("08 AM") ||
+                            messageQueue[i][0].equals("09 AM") ||
+                            messageQueueRH[i][0].equals("08 AM") ||
+                            messageQueueRH[i][0].equals("09 AM") ||
+                            messageQueueRP[i][0].equals("08 AM") ||
+                            messageQueueRP[i][0].equals("09 AM") ||
+                            messageQueueWS[i][0].equals("08 AM") ||
+                            messageQueueWS[i][0].equals("09 AM") ||
+                            messageQueueST[i][0].equals("08 AM") ||
+                            messageQueueST[i][0].equals("09 AM")
+                    ) {
+
+                        set.add(messageQueue[i][1]);
+                        set.add(messageQueueRP[i][1]);
+                        set.add(messageQueueRH[i][1]);
+                        set.add(messageQueueST[i][1]);
+                        set.add(messageQueueWS[i][1]);
+                    }
 
                 }
+
+                sendNotificationToFrontend(month, set);
             }
+            case "08 AM", "09 AM" -> {
 
-            sendNotificationToFrontend(month, set);
-        }else if(formattedTime.equals("12 PM") || formattedTime.equals("01 PM")){
-            HashSet<String> set = new HashSet<>();
+                HashSet<String> set = new HashSet<>();
 
-            for(int i=0; i< messageQueue.length; i++){
-                if(
-                        messageQueue[i][0].equals("02 PM") ||
-                                messageQueue[i][0].equals("03 PM") ||
-                                messageQueueRH[i][0].equals("02 PM") ||
-                                messageQueueRH[i][0].equals("03 PM") ||
-                                messageQueueRP[i][0].equals("02 PM") ||
-                                messageQueueRP[i][0].equals("03 PM") ||
-                                messageQueueWS[i][0].equals("02 PM") ||
-                                messageQueueWS[i][0].equals("03 PM") ||
-                                messageQueueST[i][0].equals("02 PM") ||
-                                messageQueueST[i][0].equals("03 PM")
-                ){
-                    set.add(messageQueue[i][1]);
-                    set.add(messageQueueRP[i][1]);
-                    set.add(messageQueueRH[i][1]);
-                    set.add(messageQueueST[i][1]);
-                    set.add(messageQueueWS[i][1]);
+                for (int i = 0; i < messageQueue.length; i++) {
+                    if (
+                            messageQueue[i][0].equals("10 PM") ||
+                                    messageQueue[i][0].equals("11 PM") ||
+                                    messageQueueRH[i][0].equals("10 PM") ||
+                                    messageQueueRH[i][0].equals("11 PM") ||
+                                    messageQueueRP[i][0].equals("10 PM") ||
+                                    messageQueueRP[i][0].equals("11 PM") ||
+                                    messageQueueWS[i][0].equals("10 PM") ||
+                                    messageQueueWS[i][0].equals("11 PM") ||
+                                    messageQueueST[i][0].equals("10 PM") ||
+                                    messageQueueST[i][0].equals("11 PM")
+                    ) {
+                        set.add(messageQueue[i][1]);
+                        set.add(messageQueueRP[i][1]);
+                        set.add(messageQueueRH[i][1]);
+                        set.add(messageQueueST[i][1]);
+                        set.add(messageQueueWS[i][1]);
 
+                    }
                 }
+
+                sendNotificationToFrontend(month, set);
             }
+            case "10 AM", "11 AM" -> {
+                System.out.println("Time is :" + formattedTime);
+                HashSet<String> set = new HashSet<>();
 
-            sendNotificationToFrontend(month, set);
+                for (int i = 0; i < messageQueue.length; i++) {
+                    if (
+                            messageQueue[i][0].equals("12 PM") ||
+                                    messageQueue[i][0].equals("01 PM") ||
+                                    messageQueueRH[i][0].equals("12 PM") ||
+                                    messageQueueRH[i][0].equals("01 PM") ||
+                                    messageQueueRP[i][0].equals("12 PM") ||
+                                    messageQueueRP[i][0].equals("01 PM") ||
+                                    messageQueueWS[i][0].equals("12 PM") ||
+                                    messageQueueWS[i][0].equals("01 PM") ||
+                                    messageQueueST[i][0].equals("12 PM") ||
+                                    messageQueueST[i][0].equals("01 PM")
+                    ) {
+                        set.add(messageQueue[i][1]);
+                        set.add(messageQueueRP[i][1]);
+                        set.add(messageQueueRH[i][1]);
+                        set.add(messageQueueST[i][1]);
+                        set.add(messageQueueWS[i][1]);
 
-
-        }else if(formattedTime.equals("02 PM") || formattedTime.equals("03 PM")){
-            HashSet<String> set = new HashSet<>();
-
-            for(int i=0; i< messageQueue.length; i++){
-                if(
-                        messageQueue[i][0].equals("04 PM") ||
-                                messageQueue[i][0].equals("05 PM") ||
-                                messageQueueRH[i][0].equals("04 PM") ||
-                                messageQueueRH[i][0].equals("05 PM") ||
-                                messageQueueRP[i][0].equals("04 PM") ||
-                                messageQueueRP[i][0].equals("05 PM") ||
-                                messageQueueWS[i][0].equals("04 PM") ||
-                                messageQueueWS[i][0].equals("05 PM") ||
-                                messageQueueST[i][0].equals("04 PM") ||
-                                messageQueueST[i][0].equals("05 PM")
-                ){
-                    set.add(messageQueue[i][1]);
-                    set.add(messageQueueRP[i][1]);
-                    set.add(messageQueueRH[i][1]);
-                    set.add(messageQueueST[i][1]);
-                    set.add(messageQueueWS[i][1]);
+                    }
                 }
+
+                sendNotificationToFrontend(month, set);
             }
+            case "12 PM", "01 PM" -> {
+                HashSet<String> set = new HashSet<>();
 
-            sendNotificationToFrontend(month, set);
+                for (int i = 0; i < messageQueue.length; i++) {
+                    if (
+                            messageQueue[i][0].equals("02 PM") ||
+                                    messageQueue[i][0].equals("03 PM") ||
+                                    messageQueueRH[i][0].equals("02 PM") ||
+                                    messageQueueRH[i][0].equals("03 PM") ||
+                                    messageQueueRP[i][0].equals("02 PM") ||
+                                    messageQueueRP[i][0].equals("03 PM") ||
+                                    messageQueueWS[i][0].equals("02 PM") ||
+                                    messageQueueWS[i][0].equals("03 PM") ||
+                                    messageQueueST[i][0].equals("02 PM") ||
+                                    messageQueueST[i][0].equals("03 PM")
+                    ) {
+                        set.add(messageQueue[i][1]);
+                        set.add(messageQueueRP[i][1]);
+                        set.add(messageQueueRH[i][1]);
+                        set.add(messageQueueST[i][1]);
+                        set.add(messageQueueWS[i][1]);
 
-        }else if(formattedTime.equals("04 PM") || formattedTime.equals("05 PM")){
-            HashSet<String> set = new HashSet<>();
-
-            for(int i=0; i< messageQueue.length; i++){
-                if(
-                        messageQueue[i][0].equals("06 PM") ||
-                                messageQueue[i][0].equals("07 PM") ||
-                                messageQueueRH[i][0].equals("06 PM") ||
-                                messageQueueRH[i][0].equals("07 PM") ||
-                                messageQueueRP[i][0].equals("06 PM") ||
-                                messageQueueRP[i][0].equals("07 PM") ||
-                                messageQueueWS[i][0].equals("06 PM") ||
-                                messageQueueWS[i][0].equals("07 PM") ||
-                                messageQueueST[i][0].equals("06 PM") ||
-                                messageQueueST[i][0].equals("07 PM")
-                ){
-                    set.add(messageQueue[i][1]);
-                    set.add(messageQueueRP[i][1]);
-                    set.add(messageQueueRH[i][1]);
-                    set.add(messageQueueST[i][1]);
-                    set.add(messageQueueWS[i][1]);
+                    }
                 }
+
+                sendNotificationToFrontend(month, set);
+
+
             }
+            case "02 PM", "03 PM" -> {
+                HashSet<String> set = new HashSet<>();
 
-            sendNotificationToFrontend(month, set);
-
-        }else if(formattedTime.equals("06 PM") || formattedTime.equals("07 PM")){
-            System.out.println("Time: "+ formattedTime);
-            HashSet<String> set = new HashSet<>();
-
-            for(int i=0; i< messageQueue.length; i++){
-                if(
-                        messageQueue[i][0].equals("08 PM") ||
-                                messageQueue[i][0].equals("09 PM") ||
-                                messageQueueRH[i][0].equals("08 PM") ||
-                                messageQueueRH[i][0].equals("09 PM") ||
-                                messageQueueRP[i][0].equals("08 PM") ||
-                                messageQueueRP[i][0].equals("09 PM") ||
-                                messageQueueWS[i][0].equals("08 PM") ||
-                                messageQueueWS[i][0].equals("09 PM") ||
-                                messageQueueST[i][0].equals("08 PM") ||
-                                messageQueueST[i][0].equals("09 PM")
-                ){
-                    set.add(messageQueue[i][1]);
-                    set.add(messageQueueRP[i][1]);
-                    set.add(messageQueueRH[i][1]);
-                    set.add(messageQueueST[i][1]);
-                    set.add(messageQueueWS[i][1]);
+                for (int i = 0; i < messageQueue.length; i++) {
+                    if (
+                            messageQueue[i][0].equals("04 PM") ||
+                                    messageQueue[i][0].equals("05 PM") ||
+                                    messageQueueRH[i][0].equals("04 PM") ||
+                                    messageQueueRH[i][0].equals("05 PM") ||
+                                    messageQueueRP[i][0].equals("04 PM") ||
+                                    messageQueueRP[i][0].equals("05 PM") ||
+                                    messageQueueWS[i][0].equals("04 PM") ||
+                                    messageQueueWS[i][0].equals("05 PM") ||
+                                    messageQueueST[i][0].equals("04 PM") ||
+                                    messageQueueST[i][0].equals("05 PM")
+                    ) {
+                        set.add(messageQueue[i][1]);
+                        set.add(messageQueueRP[i][1]);
+                        set.add(messageQueueRH[i][1]);
+                        set.add(messageQueueST[i][1]);
+                        set.add(messageQueueWS[i][1]);
+                    }
                 }
-            }
 
-            sendNotificationToFrontend(month, set);
-        }
-        else{
-            String notificationMessage = "Notification service temporary stopped until morning 4 AM\n Stay Tuned!";
-            System.out.println(notificationMessage);
-            firebaseMessagingService.sendNotificationByToken(notificationMessage);
+                sendNotificationToFrontend(month, set);
+
+            }
+            case "04 PM", "05 PM" -> {
+                HashSet<String> set = new HashSet<>();
+
+                for (int i = 0; i < messageQueue.length; i++) {
+                    if (
+                            messageQueue[i][0].equals("06 PM") ||
+                                    messageQueue[i][0].equals("07 PM") ||
+                                    messageQueueRH[i][0].equals("06 PM") ||
+                                    messageQueueRH[i][0].equals("07 PM") ||
+                                    messageQueueRP[i][0].equals("06 PM") ||
+                                    messageQueueRP[i][0].equals("07 PM") ||
+                                    messageQueueWS[i][0].equals("06 PM") ||
+                                    messageQueueWS[i][0].equals("07 PM") ||
+                                    messageQueueST[i][0].equals("06 PM") ||
+                                    messageQueueST[i][0].equals("07 PM")
+                    ) {
+                        set.add(messageQueue[i][1]);
+                        set.add(messageQueueRP[i][1]);
+                        set.add(messageQueueRH[i][1]);
+                        set.add(messageQueueST[i][1]);
+                        set.add(messageQueueWS[i][1]);
+                    }
+                }
+
+                sendNotificationToFrontend(month, set);
+
+            }
+            case "06 PM", "07 PM" -> {
+                System.out.println("Time: " + formattedTime);
+                HashSet<String> set = new HashSet<>();
+
+                for (int i = 0; i < messageQueue.length; i++) {
+                    if (
+                            messageQueue[i][0].equals("08 PM") ||
+                                    messageQueue[i][0].equals("09 PM") ||
+                                    messageQueueRH[i][0].equals("08 PM") ||
+                                    messageQueueRH[i][0].equals("09 PM") ||
+                                    messageQueueRP[i][0].equals("08 PM") ||
+                                    messageQueueRP[i][0].equals("09 PM") ||
+                                    messageQueueWS[i][0].equals("08 PM") ||
+                                    messageQueueWS[i][0].equals("09 PM") ||
+                                    messageQueueST[i][0].equals("08 PM") ||
+                                    messageQueueST[i][0].equals("09 PM")
+                    ) {
+                        set.add(messageQueue[i][1]);
+                        set.add(messageQueueRP[i][1]);
+                        set.add(messageQueueRH[i][1]);
+                        set.add(messageQueueST[i][1]);
+                        set.add(messageQueueWS[i][1]);
+                    }
+                }
+
+                sendNotificationToFrontend(month, set);
+            }
+            default -> {
+                String notificationMessage = "දැනුම්දීමේ සේවාව තාවකාලිකව නවතා ඇති අතර පෙරවරු 4ට නැවත ක්රියාවට පැමිණේ.\n" +
+                        "සම්බන්ධව සිටින්න!";
+                System.out.println(notificationMessage);
+                firebaseMessagingService.sendNotificationByToken(notificationMessage);
+            }
         }
 
 

@@ -17,28 +17,26 @@ import java.util.List;
 public class WeatherController {
 
     @Autowired
-    private WeatherService weather;
+    private WeatherService service;
 
     @Autowired
     private FirebaseMessagingService firebaseMessagingService;
 
-    @PostMapping("/demo")
-    public List<WeatherData> getCity(@RequestBody LocationAndTokenReceiver firebaseNotification){
-        System.out.println("Fetched the city");
+    @PostMapping("/location")
+    public void locationAndTokenReceiver(@RequestBody LocationAndTokenReceiver receiver){
 
-        if(firebaseNotification == null){
-            System.out.println("no data found");
-            return null;
-        }
+        System.out.println("Token: "+receiver.getFcmToken());
 
-        weather.getCity(firebaseNotification);
+        // weatherService class
+        service.retrieveLocation(receiver);
 
-        firebaseMessagingService.getTokenFromController(firebaseNotification);
+        service.getLocationName(receiver);
 
-        // retrieve weather data for the given city
-        return weather.getWeatherData(firebaseNotification.getCity());
+
+        firebaseMessagingService.getTokenFromController(receiver);
+
+
     }
-
 
 
 }

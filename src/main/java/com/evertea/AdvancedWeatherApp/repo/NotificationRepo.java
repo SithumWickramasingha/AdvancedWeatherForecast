@@ -6,8 +6,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@EnableJpaRepositories
 public interface NotificationRepo extends JpaRepository<WeatherNotification, Long> {
 
-    WeatherNotification findById(int id);
+    WeatherNotification findById(String id);
 }

@@ -6,33 +6,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class FirebaseMessagingService {
 
     String token;
-
     @Autowired
     private FirebaseMessaging firebaseMessaging;
 
-    public void getTokenFromController(LocationAndTokenReceiver notification){
-        token = notification.getRecipientToken();
-        System.out.println("controller : "+token);
+    //private Firestore db;
+
+    public void getTokenFromController(LocationAndTokenReceiver receiver){
+        token = receiver.getFcmToken();
+        System.out.println("Token from getTokenFromController: "+token);
     }
 
-    public String sendNotificationByToken(String message){
-        System.out.println("send notification by token called");
+    public String sendNotificationByToken(String body){
+
+        // To store notification when user in offline
+        Map<String,String> data = new HashMap<>();
 
         String title = "☁️ System Alert!" + String.valueOf(new Date());
-        String body = message;
-
-
-//        Map<String, String> data = new HashMap<>();
-//        data.put("title", title);
-//        data.put("body", body);
-//        data.put("Time", String.valueOf(new Date()));
-
-
 
 
         Notification notification = Notification.builder()
@@ -40,22 +36,37 @@ public class FirebaseMessagingService {
                 .setBody(body)
                 .build();
 
-        Message message1 = Message.builder()
+        Message message = Message.builder()
                 .setToken(token)
                 .setNotification(notification)
                 .build();
 
-
-
         try{
-            firebaseMessaging.send(message1);
+            firebaseMessaging.send(message);
+            //saveNotificationToFirestore(title,body);
+            System.out.println("Success sending push notification");
             return "Success sending notification";
-        }catch(FirebaseMessagingException e){
+        }catch (FirebaseMessagingException e){
             e.printStackTrace();
             return "Error sending notification";
         }
 
 
-
     }
+
+//    public void saveNotificationToFirestore(String title, String body){
+//        System.out.println("saveNotificationToFirestore called");
+//        Map<String,Object> notification = new HashMap<>();
+//
+//        notification.put("title",title);
+//        notification.put("body", body);
+//        notification.put("timestamp",System.currentTimeMillis());
+//        notification.put("status","pending");
+//
+//        db.collection("notifications").document(token)
+//                .collection("userNotification")
+//                .add(notification);
+//
+//        System.out.println("Saved notification to firestore");
+//    }
 }

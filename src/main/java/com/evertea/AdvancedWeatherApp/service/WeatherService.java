@@ -377,6 +377,7 @@ public class WeatherService {
 
     }
 
+
 //    private void notifyWeatherDataWebSocket(String data, String type){
 //        try{
 //            String message = data

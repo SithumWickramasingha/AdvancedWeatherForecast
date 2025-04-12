@@ -51,6 +51,8 @@ public class DynamicTableService {
         if(lastData == null || !lastData.equals(weatherDataList)){
             service.getNotificationMessage(weatherDataList, month);
             lastWeatherData.set(weatherDataList);
+        }else{
+            System.out.println("Nothing to send");
         }
 
 

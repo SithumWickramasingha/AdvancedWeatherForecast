@@ -22,7 +22,6 @@ public class ApiResponse {
             while(scanner.hasNext()) {
                 //read and append the current line to the StringBuilder
                 resultJson.append(scanner.nextLine());
-
             }
 
             return resultJson.toString(); // return the Json data as a string
